@@ -1,0 +1,8 @@
+export const canAccess = (role, action) => {
+  const permissions = {
+    'admin_master': ['view_dashboard', 'manage_users', 'edit_event', 'delete_event', 'create_event', 'view_profile'],
+    'admin_support': ['create_event', 'view_profile'],
+    'user': ['view_event', 'buy_ticket', 'comment', 'rate', 'view_profile']
+  };
+  return permissions[role]?.includes(action) || false;
+};

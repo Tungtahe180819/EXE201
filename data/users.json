@@ -1,0 +1,8 @@
+[
+  { "username": "admin_master", "password": "123", "role": "admin", "fullName": "Nguyễn Hoàng Admin", "phoneNumber": "0901112222" },
+  { "username": "admin_support", "password": "123", "role": "admin", "fullName": "Lê Thị Trợ Lý", "phoneNumber": "0903334444" },
+  { "username": "member_anh", "password": "123", "role": "user", "fullName": "Trần Tuấn Anh", "phoneNumber": "0911223344" },
+  { "username": "member_lan", "password": "123", "role": "user", "fullName": "Phạm Ngọc Lan", "phoneNumber": "0915556677" },
+  { "username": "member_hung", "password": "123", "role": "user", "fullName": "Vũ Mạnh Hùng", "phoneNumber": "0918889900" },
+  { "username": "member_mai", "password": "123", "role": "user", "fullName": "Đỗ Thu Mai", "phoneNumber": "0922334455" }
+]

@@ -1,0 +1,81 @@
+/* 1. Bảng màu chủ đạo (Modern Blue Theme) */
+:root {
+  --primary: #2563eb;
+  --primary-bg: #dbeafe;
+  --border: #e2e8f0;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --text-h: #0f172a;
+}
+
+/* 2. Tiện ích giao diện hiện đại */
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.rounded-2xl { border-radius: 1rem; }
+.rounded-3xl { border-radius: 1.5rem; }
+
+/* 3. Carousel lướt ngang mượt mà (Không hiện thanh cuộn) */
+.overflow-x-auto {
+  scroll-behavior: smooth;
+  scrollbar-width: none; 
+}
+.overflow-x-auto::-webkit-scrollbar { display: none; }
+
+/* 4. Hiệu ứng Hero 3D (Tạo điểm nhấn cho tiêu đề trang) */
+.hero {
+  position: relative;
+  perspective: 2000px;
+  transform-style: preserve-3d;
+}
+
+.hero .framework {
+  transform: rotateZ(300deg) rotateX(44deg) rotateY(39deg) scale(1.4);
+  transition: transform 0.5s ease;
+}
+
+/* 5. Đường kẻ phân cách tinh tế (Ticks style) */
+.ticks {
+  position: relative;
+  width: 100%;
+  border-top: 1px solid var(--border);
+}
+
+/* 6. Layout cho các khối thông tin (Responsive) */
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* 7. Hover Effect cho Card sự kiện (Điểm nhấn cho Eventverse) */
+.event-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border);
+}
+
+.event-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.15);
+  border-color: var(--primary);
+}
+
+/* 8. Nút bấm phong cách Modern Blue */
+.btn-modern {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.btn-modern:hover {
+  background-color: #1d4ed8;
+}
+
+/* 9. Media Query cho thiết bị di động */
+@media (max-width: 1024px) {
+  #next-steps {
+    flex-direction: column;
+  }
+}

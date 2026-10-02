@@ -1,0 +1,6 @@
+[
+  { "fullName": "Trần Tuấn Anh", "bio": "Yêu thích âm nhạc và công nghệ.", "avatar": "avatar1.png", "phoneNumber": "0911223344" },
+  { "fullName": "Phạm Ngọc Lan", "bio": "Nghệ sĩ nghiệp dư, đam mê vẽ tranh.", "avatar": "avatar2.png", "phoneNumber": "0915556677" },
+  { "fullName": "Vũ Mạnh Hùng", "bio": "Vận động viên marathon không chuyên.", "avatar": "avatar3.png", "phoneNumber": "0918889900" },
+  { "fullName": "Đỗ Thu Mai", "bio": "Food blogger chính hiệu.", "avatar": "avatar4.png", "phoneNumber": "0922334455" }
+]

@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --accent: #2563eb; /* Blue-600 */
+    --bg-light: #f8fafc; /* Blue-50 */
+  }
+  
+  body {
+    margin: 0;
+    background-color: var(--bg-light);
+    color: #1e293b;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* XÓA ĐOẠN #root CŨ VÀ THAY BẰNG: */
+#root {
+  width: 100%; /* Tràn màn hình */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Style cho các nút bấm đồng bộ */
+.btn-primary {
+  @apply bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all;
+}

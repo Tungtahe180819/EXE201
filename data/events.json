@@ -1,0 +1,68 @@
+[
+  { 
+    "name": "Đại nhạc hội EDM 2026", 
+    "description": "Đêm nhạc điện tử lớn nhất mùa hè với dàn DJ khách mời quốc tế.", 
+    "location": "Sân vận động Mỹ Đình, Hà Nội", 
+    "price": 850000, 
+    "category": "Music", 
+    "maxTickets": 500, 
+    "ticketsSold": 320,
+    "startTime": "2026-08-15T19:00:00Z",
+    "endTime": "2026-08-15T23:00:00Z"
+  },
+  { 
+    "name": "Hội thảo AI & Robot", 
+    "description": "Cập nhật những tiến bộ mới nhất trong lĩnh vực trí tuệ nhân tạo.", 
+    "location": "Trung tâm hội nghị GEM, TP.HCM", 
+    "price": 450000, 
+    "category": "Tech", 
+    "maxTickets": 200, 
+    "ticketsSold": 150,
+    "startTime": "2026-09-10T08:00:00Z",
+    "endTime": "2026-09-10T17:00:00Z"
+  },
+  { 
+    "name": "Giải chạy Marathon Vì cộng đồng", 
+    "description": "Thử thách bền bỉ với cung đường ven biển tuyệt đẹp.", 
+    "location": "Biển Mỹ Khê, Đà Nẵng", 
+    "price": 300000, 
+    "category": "Sport", 
+    "maxTickets": 1000, 
+    "ticketsSold": 750,
+    "startTime": "2026-10-05T05:00:00Z",
+    "endTime": "2026-10-05T10:00:00Z"
+  },
+  { 
+    "name": "Workshop Vẽ tranh sơn dầu", 
+    "description": "Khám phá bản thân qua nghệ thuật hội họa dưới sự hướng dẫn của nghệ sĩ.", 
+    "location": "Phòng tranh ArtSpace, Đà Lạt", 
+    "price": 600000, 
+    "category": "Art", 
+    "maxTickets": 50, 
+    "ticketsSold": 45,
+    "startTime": "2026-11-12T09:00:00Z",
+    "endTime": "2026-11-12T16:00:00Z"
+  },
+  { 
+    "name": "Food Festival 2026", 
+    "description": "Hội tụ tinh hoa ẩm thực đường phố của 3 miền.", 
+    "location": "Công viên 23/9, TP.HCM", 
+    "price": 150000, 
+    "category": "Food", 
+    "maxTickets": 2000, 
+    "ticketsSold": 1800,
+    "startTime": "2026-12-20T10:00:00Z",
+    "endTime": "2026-12-20T22:00:00Z"
+  },
+  { 
+    "name": "Talkshow Khởi nghiệp 4.0", 
+    "description": "Chia sẻ kinh nghiệm từ các CEO hàng đầu Việt Nam.", 
+    "location": "Khách sạn Hilton, Hà Nội", 
+    "price": 200000, 
+    "category": "Business", 
+    "maxTickets": 300, 
+    "ticketsSold": 210,
+    "startTime": "2027-01-15T14:00:00Z",
+    "endTime": "2027-01-15T17:00:00Z"
+  }
+]
