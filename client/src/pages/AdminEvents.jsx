@@ -43,7 +43,7 @@ export default function AdminEvents() {
         // Cập nhật lại state để UI tự render lại danh sách mới
         setEvents(prev => prev.filter(e => e._id !== id));
         toast.success("Đã xóa sự kiện thành công");
-      } catch (err) {
+      } catch {
         toast.error("Lỗi khi xóa sự kiện");
       }
     }

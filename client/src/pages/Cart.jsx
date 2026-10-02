@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 export default function Cart() {
   const navigate = useNavigate();
   const [paying, setPaying] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('local');
+  const [bankPayment, setBankPayment] = useState(null);
   const [cart, setCart] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('cart')) || [];
@@ -40,11 +42,23 @@ export default function Cart() {
 
     try {
       setPaying(true);
-      const { data } = await axios.post('/api/tickets/checkout', {
-        items: cart.map(item => ({ eventId: item._id, quantity: item.quantity, ticketType: item.category }))
+      const items = cart.map(item => ({ eventId: item._id, quantity: item.quantity, ticketType: item.category }));
+      const endpoint = paymentMethod === 'local' ? '/api/tickets/checkout' : '/api/payments/create';
+      const { data } = await axios.post(endpoint, {
+        items,
+        ...(paymentMethod !== 'local' ? { provider: paymentMethod } : {})
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (data.paymentUrl) {
+        window.location.assign(data.paymentUrl);
+        return;
+      }
+      if (data.qrDataURL) {
+        setBankPayment(data);
+        toast.success('Đã tạo mã QR chuyển khoản ngân hàng.');
+        return;
+      }
       localStorage.removeItem('cart');
       setCart([]);
       toast.success(data.message || 'Thanh toán thành công!');
@@ -92,6 +106,33 @@ export default function Cart() {
           {paying ? 'Đang xử lý...' : 'Xác nhận thanh toán'}
         </button>
       </div>
+
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="mb-4 text-lg font-black">Phương thức thanh toán</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ['local', '🧪 Thanh toán thử'],
+            ['momo', '💗 Ví MoMo'],
+            ['vnpay', '💳 VNPAY'],
+            ['bank', '🏦 Chuyển khoản QR']
+          ].map(([value, label]) => (
+            <label key={value} className={`cursor-pointer rounded-xl border p-4 font-bold transition ${paymentMethod === value ? 'border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950' : 'border-slate-200 dark:border-slate-700'}`}>
+              <input type="radio" name="paymentMethod" value={value} checked={paymentMethod === value} onChange={() => { setPaymentMethod(value); setBankPayment(null); }} className="mr-2" />
+              {label}
+            </label>
+          ))}
+        </div>
+        <p className="mt-4 text-xs text-slate-500">MoMo và VNPAY dùng môi trường sandbox. Chuyển khoản ngân hàng tạo mã VietQR và cần đối soát trước khi phát hành vé.</p>
+      </div>
+
+      {bankPayment && (
+        <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center text-slate-900">
+          <h2 className="text-xl font-black">Quét mã để chuyển khoản</h2>
+          <img src={bankPayment.qrDataURL} alt="Mã VietQR thanh toán" className="mx-auto my-4 max-h-[520px] rounded-xl" />
+          <p className="font-bold">Nội dung: {bankPayment.description}</p>
+          <p className="mt-2 text-sm text-slate-600">{bankPayment.message}</p>
+        </div>
+      )}
     </div>
   );
 }

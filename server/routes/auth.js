@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { sendPasswordResetEmail } = require('../services/emailService');
 
@@ -16,12 +15,12 @@ router.post('/login', async (req, res) => {
     }
 
     const cleanEmail = String(email).trim().toLowerCase();
-    const user = await User.findOne({ email: cleanEmail });
+    const user = await User.findOne({ email: cleanEmail }).select('+password');
     if (!user) {
       return res.status(401).json({ message: "Sai tài khoản hoặc mật khẩu!" });
     }
 
-    const isMatch = await bcrypt.compare(String(password), user.password);
+    const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
       return res.status(401).json({ message: "Sai tài khoản hoặc mật khẩu!" });
@@ -60,18 +59,20 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: "Vui lòng nhập đầy đủ email và mật khẩu!" });
     }
 
+    if (String(password).length < 8 || String(password).length > 128) {
+      return res.status(400).json({ message: 'Mật khẩu phải có từ 8 đến 128 ký tự.' });
+    }
+
     const cleanEmail = String(email).trim().toLowerCase();
     const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.status(400).json({ message: "Email đã tồn tại trong hệ thống!" });
     }
 
-    const hashedPassword = await bcrypt.hash(String(password), 10);
-
     const newUser = new User({ 
       email: cleanEmail,
       username: cleanEmail,
-      password: hashedPassword, 
+      password: String(password),
       name: name ? String(name).trim() : cleanEmail,
       role: 'user' // Khớp chuẩn enum ['user', 'admin_master', 'admin_support']
     });
@@ -129,7 +130,7 @@ router.post('/reset-password', async (req, res) => {
     const rawToken = String(req.body.token || '');
     const password = String(req.body.password || '');
     if (!rawToken) return res.status(400).json({ message: 'Liên kết đặt lại mật khẩu không hợp lệ.' });
-    if (password.length < 8) return res.status(400).json({ message: 'Mật khẩu mới phải có ít nhất 8 ký tự.' });
+    if (password.length < 8 || password.length > 128) return res.status(400).json({ message: 'Mật khẩu mới phải có từ 8 đến 128 ký tự.' });
 
     const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
     const user = await User.findOne({
@@ -141,7 +142,7 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ message: 'Liên kết đã hết hạn hoặc đã được sử dụng.' });
     }
 
-    user.password = await bcrypt.hash(password, 10);
+    user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();

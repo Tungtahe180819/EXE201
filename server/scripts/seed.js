@@ -17,10 +17,11 @@ function readJson(fileName) {
 }
 
 async function seedUsers(users) {
+  const rounds = Math.min(15, Math.max(10, Number(process.env.BCRYPT_ROUNDS) || 12));
   for (const source of users) {
     const password = source.password.startsWith('$2')
       ? source.password
-      : await bcrypt.hash(source.password, 10);
+      : await bcrypt.hash(source.password, rounds);
 
     await User.findOneAndUpdate(
       { _id: source._id },

@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Đăng ký tài khoản
@@ -11,19 +10,21 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'Vui lòng nhập đầy đủ email và mật khẩu!' });
     }
 
+    if (String(password).length < 8 || String(password).length > 128) {
+      return res.status(400).json({ message: 'Mật khẩu phải có từ 8 đến 128 ký tự.' });
+    }
+
     const cleanEmail = String(email).trim().toLowerCase();
     let user = await User.findOne({ email: cleanEmail });
     if (user) {
       return res.status(400).json({ message: 'Email đã tồn tại trong hệ thống!' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
     user = new User({ 
       name: name ? String(name).trim() : 'Thành viên mới', 
       email: cleanEmail, 
       username: cleanEmail,
-      password: hashedPassword 
+      password: String(password)
     });
     
     await user.save();
@@ -44,13 +45,13 @@ exports.login = async (req, res) => {
     }
 
     const cleanEmail = String(email).trim().toLowerCase();
-    const user = await User.findOne({ email: cleanEmail });
+    const user = await User.findOne({ email: cleanEmail }).select('+password');
     
     if (!user) {
       return res.status(400).json({ message: 'Email hoặc mật khẩu không chính xác!' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
       return res.status(400).json({ message: 'Email hoặc mật khẩu không chính xác!' });

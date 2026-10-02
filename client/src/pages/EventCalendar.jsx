@@ -8,6 +8,8 @@ import toast from 'react-hot-toast';
 
 export default function EventCalendar() {
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     // Lấy danh sách sự kiện đã đăng ký hoặc sự kiện hệ thống
@@ -21,8 +23,13 @@ export default function EventCalendar() {
           backgroundColor: '#4f46e5',
         }));
         setEvents(current => [...formattedEvents, ...current.filter(item => String(item.id).startsWith('booking-'))]);
+        setError('');
       })
-      .catch(() => toast.error("Không thể tải dữ liệu lịch sự kiện!"));
+      .catch(() => {
+        setError('Không thể tải dữ liệu lịch sự kiện. Hãy kiểm tra server tại cổng 9999.');
+        toast.error("Không thể tải dữ liệu lịch sự kiện!");
+      })
+      .finally(() => setLoading(false));
     const token = localStorage.getItem('token');
     if (token && localStorage.getItem('role') === 'user') {
       axios.get('/api/bookings/mine', { headers: { Authorization: `Bearer ${token}` } })
@@ -61,9 +68,18 @@ export default function EventCalendar() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 my-8">
-      <h2 className="text-2xl font-black mb-6">📅 Lịch Trình & Sự Kiện Tổng Quản</h2>
-      <FullCalendar
+    <div className="max-w-7xl mx-auto p-4 md:p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 my-8">
+      <h2 className="text-2xl font-black mb-2">📅 Lịch Trình & Sự Kiện Tổng Quan</h2>
+      <p className="mb-6 text-sm text-slate-500">Xem theo tháng, tuần hoặc ngày. Quản trị viên có thể kéo thả để đổi lịch.</p>
+      {loading ? (
+        <div className="grid h-[650px] place-items-center rounded-2xl bg-slate-50 dark:bg-slate-950">
+          <p className="font-semibold text-indigo-600">Đang tải lịch sự kiện...</p>
+        </div>
+      ) : error ? (
+        <div className="grid h-64 place-items-center rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-rose-700">
+          <p className="font-semibold">{error}</p>
+        </div>
+      ) : <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         headerToolbar={{
@@ -76,7 +92,9 @@ export default function EventCalendar() {
         events={events}
         eventDrop={handleEventDrop}
         height="650px"
-      />
+        locale="vi"
+        noEventsContent="Chưa có sự kiện trong khoảng thời gian này"
+      />}
     </div>
   );
 }

@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AIPlannerModal from '../components/AIPlannerModal';
+import FilterSection from '../components/FilterSection';
+
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80';
 
 export default function Home() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +37,10 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [events]);
 
-  const featuredEvents = events.slice(0, 5);
+  const filteredEvents = selectedCategory === 'all'
+    ? events
+    : events.filter(event => event.category === selectedCategory);
+  const featuredEvents = events.filter(event => event.image || event.imageUrl).slice(0, 5);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-20 transition-colors duration-300">
@@ -64,6 +71,11 @@ export default function Home() {
                   idx === currentIndex ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
                 }`}
               >
+                <img
+                  src={ev.imageUrl || ev.image || FALLBACK_IMAGE}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-indigo-950/90 to-purple-950/80 z-10" />
                 
                 <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-12 w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -98,13 +110,12 @@ export default function Home() {
                   </div>
                   
                   <div className="hidden md:flex justify-center">
-                    <div className="w-80 h-96 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl shadow-2xl p-6 flex flex-col justify-between transform rotate-2 hover:rotate-0 transition duration-500">
-                      <div className="bg-white/20 backdrop-blur-md rounded-2xl p-4 text-white">
+                    <div className="relative w-80 h-96 overflow-hidden rounded-3xl border border-white/20 shadow-2xl transform rotate-2 hover:rotate-0 transition duration-500">
+                      <img src={ev.imageUrl || ev.image || FALLBACK_IMAGE} alt={ev.title || ev.name} className="absolute inset-0 h-full w-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 m-4 bg-black/45 backdrop-blur-md rounded-2xl p-4 text-white">
                         <span className="text-xs uppercase tracking-widest font-bold opacity-80">Eventverse Spotlight</span>
                         <h3 className="text-xl font-bold mt-1">{ev.title || ev.name}</h3>
-                      </div>
-                      <div className="text-white text-right">
-                        <span className="text-xs opacity-75">Được đề xuất bởi hệ thống</span>
                       </div>
                     </div>
                   </div>
@@ -129,18 +140,19 @@ export default function Home() {
 
       {/* --- DANH SÁCH TOÀN BỘ SỰ KIỆN --- */}
       <div className="max-w-7xl mx-auto px-4 mt-16">
+        <FilterSection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-black border-l-8 border-indigo-600 pl-4">Tất Cả Sự Kiện</h2>
-          <span className="text-sm text-slate-500 dark:text-slate-400">Đang hiển thị {events.length} sự kiện</span>
+          <span className="text-sm text-slate-500 dark:text-slate-400">Đang hiển thị {filteredEvents.length} sự kiện</span>
         </div>
         
         {loading ? (
           <p className="text-center text-slate-500 py-12">Đang tải danh sách sự kiện...</p>
-        ) : events.length === 0 ? (
-          <p className="text-center text-slate-500 py-12">Hiện chưa có sự kiện nào trong hệ thống.</p>
+        ) : filteredEvents.length === 0 ? (
+          <p className="text-center text-slate-500 py-12">Không có sự kiện phù hợp với bộ lọc.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {events.map(ev => (
+            {filteredEvents.map(ev => (
               <div 
                 key={ev._id} 
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col justify-between cursor-pointer hover:scale-[1.02] transition duration-300"
@@ -149,7 +161,7 @@ export default function Home() {
                 {/* 👉 THẺ HIỂN THỊ ẢNH SỰ KIỆN */}
                 <div className="h-48 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img 
-                    src={ev.imageUrl || ev.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80'} 
+                    src={ev.imageUrl || ev.image || FALLBACK_IMAGE}
                     alt={ev.title || ev.name} 
                     className="w-full h-full object-cover"
                   />

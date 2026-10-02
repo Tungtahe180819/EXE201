@@ -20,6 +20,7 @@ const usersRoutes = require('./routes/usersRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 9999;
@@ -70,6 +71,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/payments', paymentRoutes);
 
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);

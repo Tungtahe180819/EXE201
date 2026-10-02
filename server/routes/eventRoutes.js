@@ -70,6 +70,16 @@ router.get('/featured', async (req, res) => {
     }
 });
 
+// Lấy danh mục động từ dữ liệu thay vì viết cứng ở giao diện.
+router.get('/categories', async (req, res) => {
+    try {
+        const categories = await Event.distinct('category', { category: { $nin: [null, ''] } });
+        return res.status(200).json(categories.sort((a, b) => a.localeCompare(b, 'vi')));
+    } catch (err) {
+        return res.status(500).json({ message: 'Không thể tải danh sách thể loại: ' + err.message });
+    }
+});
+
 // --- 3. ROUTE XUẤT LỊCH ĐỒNG BỘ (.ICS) ---
 router.post('/export-ics', exportEventToICS);
 

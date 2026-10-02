@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Vì App.jsx nằm trong thư mục pages, cần lùi 1 cấp (../) để trỏ ra thư mục components
 import Navbar from "../components/Navbar";
@@ -25,12 +25,26 @@ import EditEvent from './EditEvent';
 import EventCalendar from './EventCalendar';
 import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
+import PaymentResult from './PaymentResult';
 import ContactSurveyModal from '../components/ContactSurveyModal';
 import { LanguageContext } from '../context/LanguageContext';
 
 function App() {
   const [role, setRole] = useState(localStorage.getItem("role"));
   const [lang, updateLang] = useState(localStorage.getItem('lang') || 'vi');
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.style.colorScheme = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(current => current === 'dark' ? 'light' : 'dark');
   const setLang = value => {
     localStorage.setItem('lang', value);
     document.documentElement.lang = value;
@@ -41,7 +55,7 @@ function App() {
     <LanguageContext.Provider value={{ lang, setLang }}>
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-        <Navbar role={role} setRole={setRole} />
+        <Navbar role={role} setRole={setRole} theme={theme} toggleTheme={toggleTheme} />
 
         <main className="flex-grow">
           <Routes>
@@ -50,6 +64,7 @@ function App() {
             <Route path="/register" element={<Auth key="register" setRole={setRole} />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/payment-result" element={<PaymentResult />} />
             <Route path="/feedback" element={<ContactSurveyModal />} />
 
             <Route path="/events" element={<Events />} />

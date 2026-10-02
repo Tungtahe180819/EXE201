@@ -3,18 +3,20 @@ import { useNavigate, Link } from 'react-router-dom';
 import NotificationMenu from './NotificationMenu';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function Navbar({ role, setRole }) {
+export default function Navbar({ role, setRole, theme, toggleTheme }) {
   const [keyword, setKeyword] = useState('');
   const navigate = useNavigate();
   const { lang } = useLanguage();
   const t = lang === 'en' ? {
     search: 'Search events, workshops, music, art...', home: 'Home', calendar: 'Calendar', feedback: 'Feedback',
     dashboard: 'Dashboard', manage: 'Manage events', create: '+ Create event', cart: 'Cart', tickets: 'My tickets',
-    profile: 'Profile 👤', logout: 'Log out', login: 'Log in', register: 'Sign up'
+    profile: 'Profile 👤', logout: 'Log out', login: 'Log in', register: 'Sign up',
+    lightTheme: 'Switch to light mode', darkTheme: 'Switch to dark mode'
   } : {
     search: 'Tìm kiếm sự kiện, hội thảo, âm nhạc, nghệ thuật...', home: 'Trang chủ', calendar: 'Lịch sự kiện', feedback: 'Góp ý',
     dashboard: 'Dashboard', manage: 'Quản lý sự kiện', create: '+ Tạo sự kiện', cart: 'Giỏ hàng', tickets: 'Vé của tôi',
-    profile: 'Hồ Sơ 👤', logout: 'Đăng Xuất', login: 'Đăng Nhập', register: 'Đăng Ký'
+    profile: 'Hồ Sơ 👤', logout: 'Đăng Xuất', login: 'Đăng Nhập', register: 'Đăng Ký',
+    lightTheme: 'Chuyển sang giao diện sáng', darkTheme: 'Chuyển sang giao diện tối'
   };
 
   const handleSearch = (e) => {
@@ -25,7 +27,9 @@ export default function Navbar({ role, setRole }) {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('user');
     setRole(null);
     navigate('/login');
   };
@@ -56,6 +60,15 @@ export default function Navbar({ role, setRole }) {
           <Link to="/" className="font-semibold text-sm hover:text-indigo-600 transition hidden lg:block">{t.home}</Link>
           <Link to="/calendar" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.calendar}</Link>
           <Link to="/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.feedback}</Link>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? t.lightTheme : t.darkTheme}
+            title={theme === 'dark' ? t.lightTheme : t.darkTheme}
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-100 text-lg shadow-sm transition hover:scale-105 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
           {role === 'admin_master' && (
             <Link to="/admin/dashboard" className="font-semibold text-sm hover:text-indigo-600 transition hidden lg:block">
               {t.dashboard}

@@ -1,16 +1,37 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const categoryIcons = {
+  'Công nghệ': '💻',
+  'Âm nhạc': '🎶',
+  'Thể thao': '⚽',
+  'Giáo dục': '📚',
+  'Ẩm thực': '🍜',
+  'Gaming': '🎮',
+  'Nghệ thuật': '🎨'
+};
+
 export default function FilterSection({ selectedCategory, setSelectedCategory }) {
-  const categories = [
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    axios.get('/api/events/categories')
+      .then(({ data }) => setCategories(Array.isArray(data) ? data : []))
+      .catch(() => setCategories([]));
+  }, []);
+
+  const options = [
     { id: 'all', label: 'Tất cả sự kiện 🌟' },
-    { id: 'Công nghệ', label: 'Công nghệ & AI 💻' },
-    { id: 'Âm nhạc', label: 'Âm nhạc & Lễ hội 🎶' },
-    { id: 'Thể thao', label: 'Thể thao & Giải trí ⚽' },
-    { id: 'Giáo dục', label: 'Học thuật & Workshop 📚' }
+    ...categories.map(category => ({
+      id: category,
+      label: `${category} ${categoryIcons[category] || '🎟️'}`
+    }))
   ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 my-6">
       <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
-        {categories.map(cat => (
+        {options.map(cat => (
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
