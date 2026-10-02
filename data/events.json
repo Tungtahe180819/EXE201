@@ -1,68 +1,158 @@
 [
-  { 
-    "name": "Đại nhạc hội EDM 2026", 
-    "description": "Đêm nhạc điện tử lớn nhất mùa hè với dàn DJ khách mời quốc tế.", 
-    "location": "Sân vận động Mỹ Đình, Hà Nội", 
-    "price": 850000, 
-    "category": "Music", 
-    "maxTickets": 500, 
-    "ticketsSold": 320,
-    "startTime": "2026-08-15T19:00:00Z",
-    "endTime": "2026-08-15T23:00:00Z"
+  {
+    "title": "Đại nhạc hội EDM Mùa Hè 2026",
+    "category": "Âm nhạc",
+    "description": "Đại nhạc hội điện tử hoành tráng nhất năm với sự góp mặt của các DJ hàng đầu quốc tế và hệ thống âm thanh, ánh sáng laser đỉnh cao tại sân vận động.",
+    "location": {
+      "address": "Sân vận động Quốc gia Mỹ Đình, Nam Từ Liêm",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-07-15T19:00:00.000Z",
+    "price": 350000,
+    "stock": 500,
+    "image": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80"
   },
-  { 
-    "name": "Hội thảo AI & Robot", 
-    "description": "Cập nhật những tiến bộ mới nhất trong lĩnh vực trí tuệ nhân tạo.", 
-    "location": "Trung tâm hội nghị GEM, TP.HCM", 
-    "price": 450000, 
-    "category": "Tech", 
-    "maxTickets": 200, 
-    "ticketsSold": 150,
-    "startTime": "2026-09-10T08:00:00Z",
-    "endTime": "2026-09-10T17:00:00Z"
+  {
+    "title": "Hội thảo Tương lai AI & Robot 2026",
+    "category": "Công nghệ",
+    "description": "Sự kiện công nghệ quy tụ các chuyên gia AI hàng đầu thế giới thảo luận về GenAI, Agentic Workflow và xu hướng tự động hóa trong kỷ nguyên số.",
+    "location": {
+      "address": "Trung tâm Hội nghị Quốc gia, Nam Từ Liêm",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-08-10T08:30:00.000Z",
+    "price": 150000,
+    "stock": 200,
+    "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80"
   },
-  { 
-    "name": "Giải chạy Marathon Vì cộng đồng", 
-    "description": "Thử thách bền bỉ với cung đường ven biển tuyệt đẹp.", 
-    "location": "Biển Mỹ Khê, Đà Nẵng", 
-    "price": 300000, 
-    "category": "Sport", 
-    "maxTickets": 1000, 
-    "ticketsSold": 750,
-    "startTime": "2026-10-05T05:00:00Z",
-    "endTime": "2026-10-05T10:00:00Z"
+  {
+    "title": "Giải chạy Marathon Vì cộng đồng Hà Nội",
+    "category": "Thể thao",
+    "description": "Giải chạy thường niên lan tỏa lối sống xanh và khỏe mạnh, quyên góp quỹ hỗ trợ trẻ em vùng cao. Cung đường chạy quanh các thắng cảnh đẹp của Thủ đô.",
+    "location": {
+      "address": "Khu vực Hồ Hoàn Kiếm",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-09-02T05:00:00.000Z",
+    "price": 200000,
+    "stock": 1000,
+    "image": "https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=1200&q=80"
   },
-  { 
-    "name": "Workshop Vẽ tranh sơn dầu", 
-    "description": "Khám phá bản thân qua nghệ thuật hội họa dưới sự hướng dẫn của nghệ sĩ.", 
-    "location": "Phòng tranh ArtSpace, Đà Lạt", 
-    "price": 600000, 
-    "category": "Art", 
-    "maxTickets": 50, 
-    "ticketsSold": 45,
-    "startTime": "2026-11-12T09:00:00Z",
-    "endTime": "2026-11-12T16:00:00Z"
+  {
+    "title": "Lễ hội Ẩm thực Đường phố Việt Nam",
+    "category": "Ẩm thực",
+    "description": "Trải nghiệm thiên đường ẩm thực 3 miền với hơn 100 gian hàng món ngon đặc sắc, không gian check-in rực rỡ và các màn biểu diễn nghệ thuật đường phố.",
+    "location": {
+      "address": "Công viên Thống Nhất, Hai Bà Trưng",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-08-20T10:00:00.000Z",
+    "price": 50000,
+    "stock": 800,
+    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80"
   },
-  { 
-    "name": "Food Festival 2026", 
-    "description": "Hội tụ tinh hoa ẩm thực đường phố của 3 miền.", 
-    "location": "Công viên 23/9, TP.HCM", 
-    "price": 150000, 
-    "category": "Food", 
-    "maxTickets": 2000, 
-    "ticketsSold": 1800,
-    "startTime": "2026-12-20T10:00:00Z",
-    "endTime": "2026-12-20T22:00:00Z"
+  {
+    "title": "Đêm nhạc Acoustic Mùa Hè Cổ Điển",
+    "category": "Âm nhạc",
+    "description": "Không gian âm nhạc nhẹ nhàng, lắng đọng với những bản tình ca vượt thời gian bên ly đồ uống ấm cúng tại góc phố yên bình của Hà Nội.",
+    "location": {
+      "address": "Lô 12, Phố đi bộ Trịnh Công Sơn, Tây Hồ",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-07-25T20:00:00.000Z",
+    "price": 120000,
+    "stock": 120,
+    "image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80"
   },
-  { 
-    "name": "Talkshow Khởi nghiệp 4.0", 
-    "description": "Chia sẻ kinh nghiệm từ các CEO hàng đầu Việt Nam.", 
-    "location": "Khách sạn Hilton, Hà Nội", 
-    "price": 200000, 
-    "category": "Business", 
-    "maxTickets": 300, 
-    "ticketsSold": 210,
-    "startTime": "2027-01-15T14:00:00Z",
-    "endTime": "2027-01-15T17:00:00Z"
+  {
+    "title": "Workshop Sáng tạo UI/UX & Thiết kế Đồ họa",
+    "category": "Giáo dục",
+    "description": "Buổi chia sẻ chuyên sâu về quy trình thiết kế sản phẩm số chuẩn quốc tế, mẹo sử dụng Figma hiệu quả từ các Senior Designer.",
+    "location": {
+      "address": "Tòa nhà Innovation Building, Cầu Giấy",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-08-05T14:00:00.000Z",
+    "price": 100000,
+    "stock": 80,
+    "image": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "title": "Giải đấu Esports Sinh viên toàn quốc - Mùa 4",
+    "category": "Gaming",
+    "description": "Trận chung kết tổng kịch tính của các đội tuyển sinh viên xuất sắc nhất tranh tài các tựa game Esport đỉnh cao với tổng giải thưởng lên tới hàng trăm triệu đồng.",
+    "location": {
+      "address": "Nhà thi đấu Trịnh Hoài Đức, Đống Đa",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-08-15T09:00:00.000Z",
+    "price": 80000,
+    "stock": 350,
+    "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "title": "Triển lãm Nghệ thuật Đương đại & Sáng tạo Số",
+    "category": "Nghệ thuật",
+    "description": "Không gian trưng bày các tác phẩm nghệ thuật số kết hợp công nghệ thực tế ảo tăng cường (AR/VR) mang lại trải nghiệm thị giác cực kỳ mãn nhãn.",
+    "location": {
+      "address": "Trung tâm Văn hóa Nghệ thuật, 22 Hàng Buồm, Hoàn Kiếm",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-07-30T09:00:00.000Z",
+    "price": 60000,
+    "stock": 150,
+    "image": "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "title": "Ngày hội Khởi nghiệp Công nghệ Sinh viên 2026",
+    "category": "Công nghệ",
+    "description": "Nơi các bạn trẻ giới thiệu các dự án khởi nghiệp sáng tạo, gọi vốn từ các quỹ đầu tư thiên thần và giao lưu cùng các diễn giả thành công.",
+    "location": {
+      "address": "Khu Công nghệ cao Hòa Lạc, Thạch Thất",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-09-10T08:00:00.000Z",
+    "price": 0,
+    "stock": 400,
+    "image": "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "title": "Hội sách Mùa Thu Hà Nội",
+    "category": "Giáo dục",
+    "description": "Triển lãm sách lớn nhất trong năm với hàng ngàn tựa sách hay từ các nhà xuất bản uy tín, giao lưu tác giả và các chương trình ưu đãi giảm giá đặc biệt.",
+    "location": {
+      "address": "Phố Sách Hà Nội, Phố 19/12, Hoàn Kiếm",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-09-15T08:00:00.000Z",
+    "price": 0,
+    "stock": 600,
+    "image": "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "title": "Giải bóng đá Sinh viên Eventverse Cup",
+    "category": "Thể thao",
+    "description": "Giải bóng đá giao hữu giữa các trường đại học tại Hà Nội, cổ vũ tinh thần thể thao đoàn kết và rèn luyện sức khỏe.",
+    "location": {
+      "address": "Sân vận động Đại học Bách Khoa, Hai Bà Trưng",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-08-28T15:00:00.000Z",
+    "price": 30000,
+    "stock": 300,
+    "image": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "title": "Đêm Thời trang & Thiết kế Trẻ 2026",
+    "category": "Nghệ thuật",
+    "description": "Sơ kết các bộ sưu tập thời trang đột phá đến từ các nhà thiết kế trẻ tài năng, kết hợp ánh sáng và không gian biểu diễn mang phong cách futuristic.",
+    "location": {
+      "address": "Keangnam Hanoi Landmark Tower, Nam Từ Liêm",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-09-05T19:30:00.000Z",
+    "price": 250000,
+    "stock": 250,
+    "image": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80"
   }
 ]

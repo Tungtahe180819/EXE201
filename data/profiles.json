@@ -1,6 +1,34 @@
 [
-  { "fullName": "Trần Tuấn Anh", "bio": "Yêu thích âm nhạc và công nghệ.", "avatar": "avatar1.png", "phoneNumber": "0911223344" },
-  { "fullName": "Phạm Ngọc Lan", "bio": "Nghệ sĩ nghiệp dư, đam mê vẽ tranh.", "avatar": "avatar2.png", "phoneNumber": "0915556677" },
-  { "fullName": "Vũ Mạnh Hùng", "bio": "Vận động viên marathon không chuyên.", "avatar": "avatar3.png", "phoneNumber": "0918889900" },
-  { "fullName": "Đỗ Thu Mai", "bio": "Food blogger chính hiệu.", "avatar": "avatar4.png", "phoneNumber": "0922334455" }
+  {
+    "userId": "64d0a1b2c3d4e5f6a7b8c9d1",
+    "bio": "Quản trị viên tối cao hệ thống Eventverse. Đam mê phát triển kiến trúc phần mềm và xây dựng cộng đồng công nghệ.",
+    "phone": "0987654321",
+    "interests": ["Công nghệ", "Quản trị hệ thống", "AI"],
+    "facebook": "https://facebook.com/thiennv.master",
+    "website": "https://eventverse.vn"
+  },
+  {
+    "userId": "64d0a1b2c3d4e5f6a7b8c9d2",
+    "bio": "Chuyên viên hỗ trợ và chăm sóc khách hàng Eventverse. Sẵn sàng giải đáp mọi thắc mắc và xử lý sự cố cho người dùng 24/7.",
+    "phone": "0912345678",
+    "interests": ["Hỗ trợ sự kiện", "Giao tiếp cộng đồng", "Nghệ thuật"],
+    "facebook": "https://facebook.com/hangtt.support",
+    "website": "https://eventverse.vn/support"
+  },
+  {
+    "userId": "64d0a1b2c3d4e5f6a7b8c9d3",
+    "bio": "Yêu thích thể thao, marathon và các hoạt động kết nối cộng đồng trẻ thủ đô.",
+    "phone": "0934567890",
+    "interests": ["Thể thao", "Ẩm thực", "Gaming"],
+    "facebook": "https://facebook.com/hoangpm",
+    "website": ""
+  },
+  {
+    "userId": "64d0a1b2c3d4e5f6a7b8c9d4",
+    "bio": "Đam mê thiết kế, âm nhạc acoustic và thường xuyên tham gia các hội thảo khởi nghiệp công nghệ.",
+    "phone": "0978123456",
+    "interests": ["Âm nhạc", "Nghệ thuật", "Giáo dục"],
+    "facebook": "https://facebook.com/mailt",
+    "website": ""
+  }
 ]

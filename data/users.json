@@ -1,8 +1,62 @@
 [
-  { "username": "admin_master", "password": "123", "role": "admin", "fullName": "Nguyễn Hoàng Admin", "phoneNumber": "0901112222" },
-  { "username": "admin_support", "password": "123", "role": "admin", "fullName": "Lê Thị Trợ Lý", "phoneNumber": "0903334444" },
-  { "username": "member_anh", "password": "123", "role": "user", "fullName": "Trần Tuấn Anh", "phoneNumber": "0911223344" },
-  { "username": "member_lan", "password": "123", "role": "user", "fullName": "Phạm Ngọc Lan", "phoneNumber": "0915556677" },
-  { "username": "member_hung", "password": "123", "role": "user", "fullName": "Vũ Mạnh Hùng", "phoneNumber": "0918889900" },
-  { "username": "member_mai", "password": "123", "role": "user", "fullName": "Đỗ Thu Mai", "phoneNumber": "0922334455" }
+  {
+    "_id": "64d0a1b2c3d4e5f6a7b8c9d1",
+    "name": "Nguyễn Văn Thên",
+    "email": "thiennv@eventverse.edu.vn",
+    "password": "12345678",
+    "role": "admin_master",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "status": "Active",
+    "createdAt": "2026-05-01T08:00:00.000Z"
+  },
+  {
+    "_id": "64d0a1b2c3d4e5f6a7b8c9d2",
+    "name": "Trần Thanh Hằng",
+    "email": "hangtt.support@eventverse.edu.vn",
+    "password": "12345678",
+    "role": "admin_support",
+    "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+    "status": "Active",
+    "createdAt": "2026-05-15T09:30:00.000Z"
+  },
+  {
+    "_id": "64d0a1b2c3d4e5f6a7b8c9d3",
+    "name": "Phạm Minh Hoàng",
+    "email": "hoangpm@gmail.com",
+    "password": "12345678",
+    "role": "user",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+    "status": "Active",
+    "createdAt": "2026-06-01T10:15:00.000Z"
+  },
+  {
+    "_id": "64d0a1b2c3d4e5f6a7b8c9d4",
+    "name": "Lê Thị Mai",
+    "email": "mailt@gmail.com",
+    "password": "12345678",
+    "role": "user",
+    "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
+    "status": "Active",
+    "createdAt": "2026-06-12T14:20:00.000Z"
+  },
+  {
+    "_id": "64d0a1b2c3d4e5f6a7b8c9d5",
+    "name": "Hoàng Quốc Việt",
+    "email": "viethq@gmail.com",
+    "password": "12345678",
+    "role": "user",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+    "status": "Active",
+    "createdAt": "2026-06-20T16:45:00.000Z"
+  },
+  {
+    "_id": "64d0a1b2c3d4e5f6a7b8c9d6",
+    "name": "Vũ Thu Hương",
+    "email": "huongvt@gmail.com",
+    "password": "12345678",
+    "role": "user",
+    "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80",
+    "status": "Active",
+    "createdAt": "2026-07-01T08:10:00.000Z"
+  }
 ]

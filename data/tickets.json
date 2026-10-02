@@ -1,7 +1,38 @@
 [
-  { "userId": "ID_MEMBER_1", "eventId": "ID_EVENT_1", "quantity": 1, "totalPrice": 850000, "purchaseDate": "2026-07-01T09:00:00Z" },
-  { "userId": "ID_MEMBER_1", "eventId": "ID_EVENT_2", "quantity": 2, "totalPrice": 900000, "purchaseDate": "2026-07-02T10:30:00Z" },
-  { "userId": "ID_MEMBER_2", "eventId": "ID_EVENT_3", "quantity": 1, "totalPrice": 300000, "purchaseDate": "2026-07-03T14:15:00Z" },
-  { "userId": "ID_MEMBER_3", "eventId": "ID_EVENT_1", "quantity": 1, "totalPrice": 850000, "purchaseDate": "2026-07-04T08:45:00Z" },
-  { "userId": "ID_MEMBER_4", "eventId": "ID_EVENT_5", "quantity": 3, "totalPrice": 450000, "purchaseDate": "2026-07-05T11:20:00Z" }
+  {
+    "ticketCode": "EVT-EDM2026-9881",
+    "userId": "64d0a1b2c3d4e5f6a7b8c9d3",
+    "eventTitle": "Đại nhạc hội EDM Mùa Hè 2026",
+    "quantity": 2,
+    "totalPrice": 700000,
+    "status": "Confirmed",
+    "purchaseDate": "2026-07-01T12:00:00.000Z"
+  },
+  {
+    "ticketCode": "EVT-AI2026-4422",
+    "userId": "64d0a1b2c3d4e5f6a7b8c9d4",
+    "eventTitle": "Hội thảo Tương lai AI & Robot 2026",
+    "quantity": 1,
+    "totalPrice": 150000,
+    "status": "Confirmed",
+    "purchaseDate": "2026-07-05T09:15:00.000Z"
+  },
+  {
+    "ticketCode": "EVT-RUN2026-1109",
+    "userId": "64d0a1b2c3d4e5f6a7b8c9d5",
+    "eventTitle": "Giải chạy Marathon Vì cộng đồng Hà Nội",
+    "quantity": 3,
+    "totalPrice": 600000,
+    "status": "Pending",
+    "purchaseDate": "2026-07-10T16:45:00.000Z"
+  },
+  {
+    "ticketCode": "EVT-FOOD2026-7733",
+    "userId": "64d0a1b2c3d4e5f6a7b8c9d6",
+    "eventTitle": "Lễ hội Ẩm thực Đường phố Việt Nam",
+    "quantity": 4,
+    "totalPrice": 200000,
+    "status": "Confirmed",
+    "purchaseDate": "2026-07-12T11:20:00.000Z"
+  }
 ]
