@@ -17,41 +17,11 @@ services:
         generateValue: true
       - key: BCRYPT_ROUNDS
         value: 12
-      - key: GEMINI_API_KEY
-        sync: false
-      - key: EMAIL_SERVICE
-        value: gmail
-      - key: EMAIL_USER
-        sync: false
-      - key: EMAIL_PASS
-        sync: false
-      - key: EMAIL_FROM
-        sync: false
       - key: CLIENT_URL
-        sync: false
+        value: https://exe-201-gray.vercel.app
       - key: SERVER_PUBLIC_URL
-        sync: false
+        value: https://eventverse-api.onrender.com
       - key: MOMO_ENDPOINT
         value: https://test-payment.momo.vn/v2/gateway/api/create
-      - key: MOMO_PARTNER_CODE
-        sync: false
-      - key: MOMO_ACCESS_KEY
-        sync: false
-      - key: MOMO_SECRET_KEY
-        sync: false
       - key: VNPAY_ENDPOINT
         value: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-      - key: VNPAY_TMN_CODE
-        sync: false
-      - key: VNPAY_HASH_SECRET
-        sync: false
-      - key: VIETQR_CLIENT_ID
-        sync: false
-      - key: VIETQR_API_KEY
-        sync: false
-      - key: BANK_ACCOUNT_NO
-        sync: false
-      - key: BANK_ACQ_ID
-        sync: false
-      - key: BANK_ACCOUNT_NAME
-        sync: false
