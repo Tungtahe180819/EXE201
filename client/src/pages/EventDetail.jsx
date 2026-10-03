@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import io from 'socket.io-client';
 import EventReviewSection from '../components/EventReviewSection';
 
-const socket = io();
+const socket = io(import.meta.env.VITE_SOCKET_URL || window.location.origin);
 
 export default function EventDetail() {
   const { id } = useParams();
