@@ -72,7 +72,7 @@ export default function Profile() {
               </span>
             </div>
             {profile.role !== 'user_vip' && (
-              <p className="mt-3 text-xs font-semibold">Giai đoạn hiện tại: sau khi xác nhận thanh toán, Admin Master sẽ kích hoạt VIP thủ công trong trang Quản lý tài khoản.</p>
+              <p className="mt-3 text-xs font-semibold">Thanh toán bằng VietQR để hệ thống tự động kích hoạt VIP. Admin Master vẫn có thể hỗ trợ kích hoạt thủ công khi cần.</p>
             )}
           </section>
         )}

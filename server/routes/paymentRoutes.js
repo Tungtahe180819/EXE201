@@ -5,7 +5,7 @@ const verifyToken = require('../middleware/verifyToken');
 const { quoteOrder, fulfillOrder } = require('../services/checkoutService');
 const { createPayOSPayment, getPayOSPayment, verifyPayOSWebhook } = require('../services/paymentGatewayService');
 const { completePaidPayment } = require('../services/paymentFulfillmentService');
-const { isCustomerRole } = require('../utils/vip');
+const { isCustomerRole, VIP_ANNUAL_PRICE } = require('../utils/vip');
 
 const router = express.Router();
 
@@ -20,10 +20,22 @@ router.post('/create', verifyToken, async (req, res) => {
     const provider = String(req.body.provider || 'payos').toLowerCase();
     if (provider !== 'payos') return res.status(400).json({ message: 'Hệ thống hiện chỉ hỗ trợ thanh toán VietQR qua payOS.' });
 
-    const { items, amount } = await quoteOrder(req.body.items);
+    const wantsVip = req.body.vipPlan === true;
+    const rawItems = Array.isArray(req.body.items) ? req.body.items : [];
+    if (!wantsVip && rawItems.length === 0) return res.status(400).json({ message: 'Giỏ hàng đang trống.' });
+
+    let items = [];
+    let ticketAmount = 0;
+    if (rawItems.length > 0) {
+      const quote = await quoteOrder(rawItems);
+      items = quote.items;
+      ticketAmount = quote.amount;
+    }
+    const amount = ticketAmount + (wantsVip ? VIP_ANNUAL_PRICE : 0);
     if (amount < 1000) return res.status(400).json({ message: 'Cổng thanh toán yêu cầu đơn hàng tối thiểu 1.000₫.' });
     const orderCode = createOrderCode();
-    const payment = await Payment.create({ orderCode: String(orderCode), userId: req.user.id, items, amount, provider: 'payos' });
+    const purpose = wantsVip ? (items.length ? 'mixed' : 'vip') : 'tickets';
+    const payment = await Payment.create({ orderCode: String(orderCode), userId: req.user.id, items, amount, purpose, vipPlan: wantsVip, provider: 'payos' });
 
     try {
       const gateway = await createPayOSPayment({ orderCode, amount });
@@ -35,7 +47,9 @@ router.post('/create', verifyToken, async (req, res) => {
         orderCode: String(orderCode),
         amount,
         ...publicGateway,
-        message: 'Đã tạo mã VietQR payOS. Hệ thống sẽ tự động phát hành vé sau khi nhận được xác nhận thanh toán.'
+        message: wantsVip
+          ? 'Đã tạo mã VietQR payOS. Gói VIP sẽ tự động kích hoạt sau khi giao dịch được xác nhận.'
+          : 'Đã tạo mã VietQR payOS. Hệ thống sẽ tự động phát hành vé sau khi nhận được xác nhận thanh toán.'
       });
     } catch (error) {
       await Payment.findByIdAndDelete(payment._id);
@@ -139,7 +153,7 @@ router.get('/status/:orderCode', verifyToken, async (req, res) => {
   }
 
   const publicPayment = await Payment.findById(payment._id)
-    .select('orderCode amount provider status transactionId tickets paidAt emailSent emailMessage createdAt');
+    .select('orderCode amount provider purpose vipPlan vipExpiresAt status transactionId tickets paidAt emailSent emailMessage createdAt');
   return res.json(publicPayment);
 });
 

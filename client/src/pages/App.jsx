@@ -45,6 +45,12 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    const syncRole = event => setRole(event.detail?.role || localStorage.getItem('role'));
+    window.addEventListener('role-updated', syncRole);
+    return () => window.removeEventListener('role-updated', syncRole);
+  }, []);
+
   const toggleTheme = () => setTheme(current => current === 'dark' ? 'light' : 'dark');
   const setLang = value => {
     localStorage.setItem('lang', value);

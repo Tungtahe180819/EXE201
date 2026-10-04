@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { VIP_PLAN_ID, VIP_PLAN_ITEM } from '../utils/vipPlan';
 
 export default function VipUpgradeModal({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -6,9 +7,22 @@ export default function VipUpgradeModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const goToLogin = () => {
+  const goToCheckout = () => {
+    let cart;
+    try {
+      cart = JSON.parse(localStorage.getItem('cart')) || [];
+    } catch {
+      cart = [];
+    }
+    if (!cart.some(item => item._id === VIP_PLAN_ID)) cart.push(VIP_PLAN_ITEM);
+    localStorage.setItem('cart', JSON.stringify(cart));
     onClose();
-    navigate('/login');
+    if (!isLoggedIn) {
+      localStorage.setItem('postLoginRedirect', '/cart');
+      navigate('/login');
+      return;
+    }
+    navigate('/cart');
   };
 
   return (
@@ -35,15 +49,11 @@ export default function VipUpgradeModal({ isOpen, onClose }) {
             <li>🎟️ Giữ nguyên toàn bộ quyền mua và quản lý vé</li>
           </ul>
           <p className="mt-5 rounded-xl bg-slate-100 p-3 text-xs leading-relaxed text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-            Hiện tại, sau khi xác nhận thanh toán, Admin Master sẽ kích hoạt hoặc gia hạn VIP thủ công trong Quản lý tài khoản.
+            Gói VIP sẽ được tự động kích hoạt sau khi payOS xác nhận giao dịch VietQR thành công.
           </p>
           <div className="mt-6 flex gap-3">
             <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-bold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">Để sau</button>
-            {!isLoggedIn ? (
-              <button type="button" onClick={goToLogin} className="flex-1 rounded-xl bg-amber-500 px-4 py-3 font-black text-amber-950 hover:bg-amber-400">Đăng nhập</button>
-            ) : (
-              <button type="button" onClick={onClose} className="flex-1 rounded-xl bg-amber-500 px-4 py-3 font-black text-amber-950 hover:bg-amber-400">Đã hiểu</button>
-            )}
+            <button type="button" onClick={goToCheckout} className="flex-1 rounded-xl bg-amber-500 px-4 py-3 font-black text-amber-950 hover:bg-amber-400">Thanh toán</button>
           </div>
         </div>
       </div>

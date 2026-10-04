@@ -43,7 +43,9 @@ export default function Auth({ setRole }) {
         localStorage.setItem('role', res.data.role);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         if (setRole) setRole(res.data.role);
-        navigate('/');
+        const redirect = localStorage.getItem('postLoginRedirect') || '/';
+        localStorage.removeItem('postLoginRedirect');
+        navigate(redirect);
       } else {
         alert('Đăng ký thành công! Vui lòng đăng nhập.');
         navigate('/login');

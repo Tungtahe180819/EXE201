@@ -68,7 +68,7 @@ export default function AdminUsers() {
         <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">Admin Master</p>
         <h2 className="text-3xl font-black">Quản lý tài khoản</h2>
         <p className="text-slate-500">Quản lý {users.length} tài khoản trong hệ thống.</p>
-        <p className="mt-2 text-sm font-semibold text-amber-600">👑 Gói khách hàng VIP: 250.000đ / 1 năm. Hiện tại Admin Master kích hoạt thủ công sau khi xác nhận thanh toán.</p>
+        <p className="mt-2 text-sm font-semibold text-amber-600">👑 Gói khách hàng VIP: 250.000đ / 1 năm. payOS tự động kích hoạt sau thanh toán; Admin Master vẫn có thể hỗ trợ thủ công.</p>
       </div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border dark:border-slate-800 overflow-x-auto">
         <table className="w-full min-w-[980px] text-left">
