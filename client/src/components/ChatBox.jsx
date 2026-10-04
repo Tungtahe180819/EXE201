@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import VipUpgradeModal from './VipUpgradeModal';
 
 export default function ChatBox({ role }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,8 +9,10 @@ export default function ChatBox({ role }) {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isVipModalOpen, setIsVipModalOpen] = useState(false);
+  const isVip = role === 'user_vip';
 
-  if (role !== 'user_vip') return null;
+  if (role === 'admin_master' || role === 'admin_support') return null;
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -39,14 +42,17 @@ export default function ChatBox({ role }) {
   };
 
   return (
+    <>
     <div className="fixed bottom-6 right-6 z-50">
       {/* Nút bật/tắt khung chat */}
       {!isOpen && (
         <button 
-          onClick={() => setIsOpen(true)}
-          className="w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl transition hover:scale-110"
+          onClick={() => isVip ? setIsOpen(true) : setIsVipModalOpen(true)}
+          className="relative w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl transition hover:scale-110"
+          aria-label={isVip ? 'Mở Chatbot AI' : 'Nâng cấp VIP để dùng Chatbot AI'}
         >
           💬
+          {!isVip && <span className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full bg-amber-400 text-xs shadow">🔒</span>}
         </button>
       )}
 
@@ -99,5 +105,7 @@ export default function ChatBox({ role }) {
         </div>
       )}
     </div>
+    <VipUpgradeModal isOpen={isVipModalOpen} onClose={() => setIsVipModalOpen(false)} />
+    </>
   );
 }

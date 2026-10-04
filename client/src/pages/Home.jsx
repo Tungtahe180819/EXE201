@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import toast from 'react-hot-toast';
 import AIPlannerModal from '../components/AIPlannerModal';
+import VipUpgradeModal from '../components/VipUpgradeModal';
 import FilterSection from '../components/FilterSection';
 import { formatEventPrice, isFreePrice } from '../utils/formatPrice';
 
@@ -13,18 +13,14 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isVipModalOpen, setIsVipModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const navigate = useNavigate();
   const role = localStorage.getItem('role');
 
   const openAIPlanner = () => {
-    if (!localStorage.getItem('token')) {
-      toast.error('Vui lòng đăng nhập để sử dụng Lịch thông minh.');
-      navigate('/login');
-      return;
-    }
     if (role !== 'user_vip') {
-      toast.error('Lịch thông minh chỉ dành cho khách hàng VIP — 250.000đ/năm.');
+      setIsVipModalOpen(true);
       return;
     }
     setIsAIModalOpen(true);
@@ -221,6 +217,10 @@ export default function Home() {
       <AIPlannerModal 
         isOpen={isAIModalOpen} 
         onClose={() => setIsAIModalOpen(false)} 
+      />
+      <VipUpgradeModal
+        isOpen={isVipModalOpen}
+        onClose={() => setIsVipModalOpen(false)}
       />
     </div>
   );
