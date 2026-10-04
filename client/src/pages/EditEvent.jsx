@@ -15,6 +15,7 @@ export default function EditEvent() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [originalDates, setOriginalDates] = useState({ startDate: '', endDate: '' });
   const [event, setEvent] = useState({
     title: '', category: '', description: '', price: 0, stock: 1, totalSlots: 1,
     image: '', startDate: '', endDate: '', location: { address: '', city: '' },
@@ -23,13 +24,18 @@ export default function EditEvent() {
 
   useEffect(() => {
     axios.get(`/api/events/${id}`)
-      .then(({ data }) => setEvent({
-        ...data,
-        startDate: toLocalDateTime(data.startDate),
-        endDate: toLocalDateTime(data.endDate),
-        location: data.location || { address: '', city: '' },
-        recurrence: { ...data.recurrence, untilDate: data.recurrence?.untilDate ? toLocalDateTime(data.recurrence.untilDate).slice(0, 10) : '' },
-      }))
+      .then(({ data }) => {
+        const startDate = toLocalDateTime(data.startDate);
+        const endDate = toLocalDateTime(data.endDate);
+        setOriginalDates({ startDate, endDate });
+        setEvent({
+          ...data,
+          startDate,
+          endDate,
+          location: data.location || { address: '', city: '' },
+          recurrence: { ...data.recurrence, untilDate: data.recurrence?.untilDate ? toLocalDateTime(data.recurrence.untilDate).slice(0, 10) : '' },
+        });
+      })
       .catch(() => {
         toast.error('Không tìm thấy sự kiện.');
         navigate('/admin/events');
@@ -45,7 +51,8 @@ export default function EditEvent() {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (new Date(event.endDate) <= new Date(event.startDate)) {
+    const datesWereChanged = event.startDate !== originalDates.startDate || event.endDate !== originalDates.endDate;
+    if (datesWereChanged && new Date(event.endDate) <= new Date(event.startDate)) {
       toast.error('Thời gian kết thúc phải sau thời gian bắt đầu.');
       return;
     }
@@ -105,7 +112,27 @@ export default function EditEvent() {
           <label className="font-semibold">Địa chỉ<input required value={event.location.address || ''} onChange={e => setLocation('address', e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal" /></label>
           <label className="font-semibold">Thành phố<input required value={event.location.city || ''} onChange={e => setLocation('city', e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal" /></label>
         </div>
-        <label className="block font-semibold">URL ảnh<input required type="url" value={event.image || ''} onChange={e => setField('image', e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal" /></label>
+        <label className="block font-semibold">URL ảnh
+          <input required type="url" value={event.image || ''} onChange={e => setField('image', e.target.value.trim())} className="mt-2 w-full rounded-xl border p-3 font-normal" />
+        </label>
+        {event.image && (
+          <div className="overflow-hidden rounded-2xl border bg-slate-50">
+            <img
+              src={event.image}
+              alt="Xem trước ảnh sự kiện"
+              className="h-56 w-full object-cover"
+              onError={e => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling.style.display = 'block';
+              }}
+              onLoad={e => {
+                e.currentTarget.style.display = 'block';
+                e.currentTarget.nextElementSibling.style.display = 'none';
+              }}
+            />
+            <p className="hidden p-4 text-sm font-semibold text-red-600">Không tải được ảnh từ URL này. Hãy kiểm tra URL ảnh công khai.</p>
+          </div>
+        )}
         <div className="grid gap-4 md:grid-cols-2">
           <label className="font-semibold">Bắt đầu<input required type="datetime-local" value={event.startDate} onChange={e => setField('startDate', e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal" /></label>
           <label className="font-semibold">Kết thúc<input required type="datetime-local" value={event.endDate} onChange={e => setField('endDate', e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal" /></label>

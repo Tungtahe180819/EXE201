@@ -195,7 +195,12 @@ router.put('/:id', verifyRole(['admin_master', 'admin_support']), async (req, re
         const changes = Object.fromEntries(
             Object.entries(req.body).filter(([key]) => allowedFields.includes(key))
         );
-        if (changes.endDate && changes.startDate && new Date(changes.endDate) <= new Date(changes.startDate)) {
+        const currentEvent = await Event.findById(req.params.id);
+        if (!currentEvent) return res.status(404).json({ message: "Không tìm thấy sự kiện để sửa!" });
+
+        const startDateChanged = changes.startDate && new Date(changes.startDate).getTime() !== currentEvent.startDate.getTime();
+        const endDateChanged = changes.endDate && new Date(changes.endDate).getTime() !== currentEvent.endDate?.getTime();
+        if ((startDateChanged || endDateChanged) && changes.endDate && changes.startDate && new Date(changes.endDate) <= new Date(changes.startDate)) {
             return res.status(400).json({ message: 'Thời gian kết thúc phải sau thời gian bắt đầu.' });
         }
         const updated = await Event.findByIdAndUpdate(req.params.id, changes, { returnDocument: 'after', runValidators: true });
