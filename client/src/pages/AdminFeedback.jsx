@@ -33,7 +33,7 @@ export default function AdminFeedback() {
   return (
     <div className="mx-auto min-h-screen max-w-6xl p-6 md:p-10">
       <div className="mb-8">
-        <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">Admin Master</p>
+        <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">Khu vực quản trị</p>
         <h1 className="text-3xl font-black">Góp ý từ khách hàng</h1>
         <p className="mt-1 text-slate-500">Tổng cộng {feedbacks.length} phản hồi.</p>
       </div>

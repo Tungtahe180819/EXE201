@@ -59,7 +59,7 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
         <div className="flex items-center gap-4">
           <Link to="/" className="font-semibold text-sm hover:text-indigo-600 transition hidden lg:block">{t.home}</Link>
           <Link to="/calendar" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.calendar}</Link>
-          {role === 'admin_master' ? (
+          {(role === 'admin_master' || role === 'admin_support') ? (
             <Link to="/admin/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">Nhận góp ý</Link>
           ) : (
             <Link to="/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.feedback}</Link>

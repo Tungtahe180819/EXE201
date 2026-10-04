@@ -22,7 +22,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/', verifyRole(['admin_master']), async (req, res) => {
+router.get('/', verifyRole(['admin_master', 'admin_support']), async (req, res) => {
   try {
     const feedbacks = await Feedback.find().sort({ createdAt: -1 });
     return res.json(feedbacks);
@@ -31,7 +31,7 @@ router.get('/', verifyRole(['admin_master']), async (req, res) => {
   }
 });
 
-router.patch('/:id/status', verifyRole(['admin_master']), async (req, res) => {
+router.patch('/:id/status', verifyRole(['admin_master', 'admin_support']), async (req, res) => {
   try {
     const status = String(req.body.status || '');
     if (!['new', 'reviewed', 'resolved'].includes(status)) {

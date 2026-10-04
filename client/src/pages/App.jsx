@@ -84,7 +84,7 @@ function App() {
             {/* Bảo mật Route cho Admin Master */}
             <Route path="/admin/dashboard" element={role === "admin_master" ? <AdminDash /> : <Navigate to="/" />} />
             <Route path="/admin/users" element={role === "admin_master" ? <AdminUsers /> : <Navigate to="/" />} />
-            <Route path="/admin/feedback" element={role === "admin_master" ? <AdminFeedback /> : <Navigate to="/" />} />
+            <Route path="/admin/feedback" element={(role === "admin_master" || role === "admin_support") ? <AdminFeedback /> : <Navigate to="/" />} />
             <Route path="/admin/revenue" element={role === "admin_master" ? <AdminRevenue /> : <Navigate to="/" />} />
 
             {/* Admin Master và Admin Support cùng quản lý; chỉ Admin Support được tạo mới */}
