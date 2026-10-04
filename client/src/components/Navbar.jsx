@@ -59,7 +59,11 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
         <div className="flex items-center gap-4">
           <Link to="/" className="font-semibold text-sm hover:text-indigo-600 transition hidden lg:block">{t.home}</Link>
           <Link to="/calendar" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.calendar}</Link>
-          <Link to="/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.feedback}</Link>
+          {role === 'admin_master' ? (
+            <Link to="/admin/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">Nhận góp ý</Link>
+          ) : (
+            <Link to="/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.feedback}</Link>
+          )}
           <button
             type="button"
             onClick={toggleTheme}
@@ -70,9 +74,10 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
           {role === 'admin_master' && (
-            <Link to="/admin/dashboard" className="font-semibold text-sm hover:text-indigo-600 transition hidden lg:block">
-              {t.dashboard}
-            </Link>
+            <>
+              <Link to="/admin/dashboard" className="font-semibold text-sm hover:text-indigo-600 transition hidden lg:block">{t.dashboard}</Link>
+              <Link to="/admin/users" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">Quản lý tài khoản</Link>
+            </>
           )}
           {(role === 'admin_support' || role === 'admin_master') && (
             <>

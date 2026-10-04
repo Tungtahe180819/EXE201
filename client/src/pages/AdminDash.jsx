@@ -63,6 +63,7 @@ export default function AdminDash() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link to="/admin/users" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200">Người dùng</Link>
+            <Link to="/admin/feedback" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200">Nhận góp ý</Link>
             <Link to="/admin/events" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200">Sự kiện</Link>
             <Link to="/add" className="rounded-xl bg-indigo-600 px-4 py-2 font-bold text-white shadow-sm">+ Tạo sự kiện</Link>
           </div>

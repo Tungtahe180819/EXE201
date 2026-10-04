@@ -12,6 +12,7 @@ import Home from "./Home";
 import Auth from "./Auth";
 import AdminDash from "./AdminDash";
 import AdminUsers from "./AdminUsers";
+import AdminFeedback from './AdminFeedback';
 import AdminRevenue from "./AdminRevenue";
 import AdminEvents from './AdminEvents';
 import SupportHome from './SupportHome';
@@ -83,6 +84,7 @@ function App() {
             {/* Bảo mật Route cho Admin Master */}
             <Route path="/admin/dashboard" element={role === "admin_master" ? <AdminDash /> : <Navigate to="/" />} />
             <Route path="/admin/users" element={role === "admin_master" ? <AdminUsers /> : <Navigate to="/" />} />
+            <Route path="/admin/feedback" element={role === "admin_master" ? <AdminFeedback /> : <Navigate to="/" />} />
             <Route path="/admin/revenue" element={role === "admin_master" ? <AdminRevenue /> : <Navigate to="/" />} />
 
             {/* Bảo mật Route cho Admin Support & Master */}

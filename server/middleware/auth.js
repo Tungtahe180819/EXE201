@@ -1,7 +1,8 @@
 // server/middleware/auth.js
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-const verifyRole = (requiredRoles) => (req, res, next) => {
+const verifyRole = (requiredRoles) => async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
@@ -9,7 +10,9 @@ const verifyRole = (requiredRoles) => (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
+        const user = await User.findById(decoded.id).select('role status');
+        if (!user || user.status !== 'Active') return res.status(403).json({ message: 'Tài khoản không tồn tại hoặc đã bị khóa!' });
+        req.user = { ...decoded, role: user.role };
 
         if (requiredRoles.includes(req.user.role)) {
             next();

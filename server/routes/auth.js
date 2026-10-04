@@ -20,6 +20,10 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: "Sai tài khoản hoặc mật khẩu!" });
     }
 
+    if (user.status !== 'Active') {
+      return res.status(403).json({ message: user.status === 'Banned' ? 'Tài khoản đã bị khóa!' : 'Tài khoản hiện không hoạt động!' });
+    }
+
     const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {

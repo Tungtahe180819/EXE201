@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
+  const [updatingId, setUpdatingId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,30 +33,62 @@ export default function AdminUsers() {
     fetchUsers();
   }, [navigate]);
 
+  const updateUser = async (id, changes) => {
+    try {
+      setUpdatingId(id);
+      const { data } = await axios.patch(`/api/users/${id}`, changes, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setUsers(current => current.map(user => user._id === id ? data.user : user));
+      toast.success(data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Không thể cập nhật tài khoản.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Quản lý tài khoản</h2>
-      <div className="bg-white rounded-xl shadow-sm border">
-        <table className="w-full text-left">
+    <div className="p-6 md:p-10 max-w-6xl mx-auto min-h-screen">
+      <div className="mb-6"><p className="text-sm font-bold uppercase tracking-widest text-indigo-600">Admin Master</p><h2 className="text-3xl font-black">Quản lý tài khoản</h2><p className="text-slate-500">Quản lý {users.length} tài khoản trong hệ thống.</p></div>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border dark:border-slate-800 overflow-x-auto">
+        <table className="w-full min-w-[760px] text-left">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="p-4">Username</th>
+              <th className="p-4">Tên</th>
               <th className="p-4">Email</th>
-              <th className="p-4">Role</th>
+              <th className="p-4">Vai trò</th>
+              <th className="p-4">Trạng thái</th>
             </tr>
           </thead>
           <tbody>
             {users.length > 0 ? (
               users.map(user => (
                 <tr key={user._id} className="border-b">
-                  <td className="p-4">{user.username}</td>
+                  <td className="p-4 font-bold">{user.name || user.username || 'Chưa cập nhật'}</td>
                   <td className="p-4">{user.email}</td>
-                  <td className="p-4 text-gray-500">{user.role}</td>
+                  <td className="p-4">
+                    {user.role === 'admin_master' ? <span className="font-bold text-indigo-600">Admin Master</span> : (
+                      <select disabled={updatingId === user._id} value={user.role} onChange={event => updateUser(user._id, { role: event.target.value })} className="rounded-lg border px-3 py-2 disabled:opacity-50">
+                        <option value="user">Khách hàng</option>
+                        <option value="admin_support">Admin Support</option>
+                      </select>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    {user.role === 'admin_master' ? <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-700">Đang hoạt động</span> : (
+                      <select disabled={updatingId === user._id} value={user.status || 'Active'} onChange={event => updateUser(user._id, { status: event.target.value })} className="rounded-lg border px-3 py-2 disabled:opacity-50">
+                        <option value="Active">Đang hoạt động</option>
+                        <option value="Inactive">Ngừng hoạt động</option>
+                        <option value="Banned">Đã khóa</option>
+                      </select>
+                    )}
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3" className="p-4 text-center text-gray-500">Không có dữ liệu người dùng</td>
+                <td colSpan="4" className="p-8 text-center text-gray-500">Không có dữ liệu người dùng</td>
               </tr>
             )}
           </tbody>
