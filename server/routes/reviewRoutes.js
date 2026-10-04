@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Review = require('../models/Review');
 const Event = require('../models/Event');
 const verifyToken = require('../middleware/verifyToken');
+const { isCustomerRole } = require('../utils/vip');
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get('/event/:eventId', async (req, res) => {
 
 router.post('/event/:eventId', verifyToken, async (req, res) => {
   try {
-    if (req.user.role !== 'user') return res.status(403).json({ message: 'Chỉ người dùng mới có thể đánh giá.' });
+    if (!isCustomerRole(req.user.role)) return res.status(403).json({ message: 'Chỉ người dùng mới có thể đánh giá.' });
     if (!mongoose.isValidObjectId(req.params.eventId) || !(await Event.exists({ _id: req.params.eventId }))) return res.status(404).json({ message: 'Sự kiện không tồn tại.' });
     const rating = Number(req.body.rating);
     const comment = String(req.body.comment || '').trim();

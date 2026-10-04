@@ -31,6 +31,7 @@ import { LanguageContext } from '../context/LanguageContext';
 
 function App() {
   const [role, setRole] = useState(localStorage.getItem("role"));
+  const isCustomer = role === 'user' || role === 'user_vip';
   const [lang, updateLang] = useState(localStorage.getItem('lang') || 'vi');
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -72,9 +73,9 @@ function App() {
             {/* Route cho Lịch Trình & Sự Kiện */}
             <Route path="/calendar" element={<EventCalendar />} />
 
-            <Route path="/cart" element={role === "user" ? <Cart /> : <Navigate to="/login" />} />
-            <Route path="/my-tickets" element={role === "user" ? <MyTickets /> : <Navigate to="/login" />} />
-            <Route path="/my-tickets/:id" element={role === "user" ? <TicketDetail /> : <Navigate to="/login" />} />
+            <Route path="/cart" element={isCustomer ? <Cart /> : <Navigate to="/login" />} />
+            <Route path="/my-tickets" element={isCustomer ? <MyTickets /> : <Navigate to="/login" />} />
+            <Route path="/my-tickets/:id" element={isCustomer ? <TicketDetail /> : <Navigate to="/login" />} />
             <Route path="/profile" element={<Profile />} />
 
             {/* Đường dẫn hỗ trợ */}
@@ -98,7 +99,7 @@ function App() {
         </main>
 
         <Footer />
-        <ChatBox />
+        <ChatBox role={role} />
       </div>
     </Router>
     </LanguageContext.Provider>

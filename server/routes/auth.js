@@ -4,6 +4,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendPasswordResetEmail } = require('../services/emailService');
+const { VIP_ROLE } = require('../utils/vip');
 
 // 1. Route Đăng nhập
 router.post('/login', async (req, res) => {
@@ -30,6 +31,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: "Sai tài khoản hoặc mật khẩu!" });
     }
 
+    if (user.role === VIP_ROLE && (!user.vipExpiresAt || user.vipExpiresAt <= new Date())) {
+      await User.updateOne({ _id: user._id, role: VIP_ROLE }, { $set: { role: 'user' } });
+      user.role = 'user';
+    }
+
     const token = jwt.sign(
       { id: user._id, role: user.role || 'user' }, 
       process.env.JWT_SECRET,
@@ -45,7 +51,9 @@ router.post('/login', async (req, res) => {
         name: user.name || user.email,
         phone: user.phone || '',
         avatar: user.avatar || '',
-        bio: user.bio || ''
+        bio: user.bio || '',
+        role: user.role || 'user',
+        vipExpiresAt: user.vipExpiresAt || null
       } 
     });
   } catch (err) {
@@ -78,7 +86,7 @@ router.post('/register', async (req, res) => {
       username: cleanEmail,
       password: String(password),
       name: name ? String(name).trim() : cleanEmail,
-      role: 'user' // Khớp chuẩn enum ['user', 'admin_master', 'admin_support']
+      role: 'user'
     });
     
     await newUser.save();

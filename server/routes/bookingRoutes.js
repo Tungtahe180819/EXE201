@@ -3,11 +3,12 @@ const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Event = require('../models/Event');
 const verifyToken = require('../middleware/verifyToken');
+const { isCustomerRole } = require('../utils/vip');
 
 const router = express.Router();
 
 router.post('/', verifyToken, async (req, res) => {
-  if (req.user.role !== 'user') return res.status(403).json({ message: 'Chỉ người dùng mới có thể đặt lịch.' });
+  if (!isCustomerRole(req.user.role)) return res.status(403).json({ message: 'Chỉ người dùng mới có thể đặt lịch.' });
   if (!mongoose.isValidObjectId(req.body.eventId)) return res.status(400).json({ message: 'Sự kiện không hợp lệ.' });
   const bookingTime = new Date(req.body.bookingTime);
   if (Number.isNaN(bookingTime.getTime()) || bookingTime <= new Date()) return res.status(400).json({ message: 'Vui lòng chọn thời gian hợp lệ trong tương lai.' });

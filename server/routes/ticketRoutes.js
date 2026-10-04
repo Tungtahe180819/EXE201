@@ -3,11 +3,12 @@ const Ticket = require('../models/Ticket');
 const verifyToken = require('../middleware/verifyToken');
 const { fulfillOrder } = require('../services/checkoutService');
 const mongoose = require('mongoose');
+const { isCustomerRole } = require('../utils/vip');
 
 const router = express.Router();
 
 router.post('/checkout', verifyToken, async (req, res) => {
-    if (req.user.role !== 'user') {
+    if (!isCustomerRole(req.user.role)) {
         return res.status(403).json({ success: false, message: 'Chỉ tài khoản người dùng mới có thể mua vé.' });
     }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import AIPlannerModal from '../components/AIPlannerModal';
 import FilterSection from '../components/FilterSection';
 import { formatEventPrice, isFreePrice } from '../utils/formatPrice';
@@ -14,6 +15,20 @@ export default function Home() {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const navigate = useNavigate();
+  const role = localStorage.getItem('role');
+
+  const openAIPlanner = () => {
+    if (!localStorage.getItem('token')) {
+      toast.error('Vui lòng đăng nhập để sử dụng Lịch thông minh.');
+      navigate('/login');
+      return;
+    }
+    if (role !== 'user_vip') {
+      toast.error('Lịch thông minh chỉ dành cho khách hàng VIP — 250.000đ/năm.');
+      return;
+    }
+    setIsAIModalOpen(true);
+  };
 
   useEffect(() => {
     // Gọi API lấy danh sách sự kiện từ Backend (Port 9999)
@@ -57,7 +72,7 @@ export default function Home() {
             <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">Chào mừng đến với Eventverse 🎟️</h1>
             <p className="text-slate-400 mb-6">Khám phá các sự kiện giải trí và công nghệ đỉnh cao ngay hôm nay.</p>
             <button 
-              onClick={() => setIsAIModalOpen(true)} 
+              onClick={openAIPlanner}
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg"
             >
               Trải nghiệm Trợ Lý AI Lịch Trình ✨
@@ -102,7 +117,7 @@ export default function Home() {
                         Xem Chi Tiết & Đặt Vé 🎫
                       </button>
                       <button 
-                        onClick={() => setIsAIModalOpen(true)}
+                        onClick={openAIPlanner}
                         className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-semibold px-6 py-3 rounded-xl transition"
                       >
                         Lên Lịch AI 🤖

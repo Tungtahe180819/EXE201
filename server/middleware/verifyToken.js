@@ -1,6 +1,7 @@
 // server/middleware/verifyToken.js
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { VIP_ROLE } = require('../utils/vip');
 
 module.exports = async function (req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -12,9 +13,13 @@ module.exports = async function (req, res, next) {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.id).select('role status');
+        const user = await User.findById(decoded.id).select('role status vipExpiresAt');
         if (!user || user.status !== 'Active') return res.status(403).json({ message: 'Tài khoản không tồn tại hoặc đã bị khóa!' });
-        req.user = { ...decoded, role: user.role };
+        if (user.role === VIP_ROLE && (!user.vipExpiresAt || user.vipExpiresAt <= new Date())) {
+            await User.updateOne({ _id: user._id, role: VIP_ROLE }, { $set: { role: 'user' } });
+            user.role = 'user';
+        }
+        req.user = { ...decoded, role: user.role, vipExpiresAt: user.vipExpiresAt };
         next();
     } catch (err) {
         return res.status(403).json({ message: "Token không hợp lệ hoặc đã hết hạn!" });

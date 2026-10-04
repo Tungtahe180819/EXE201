@@ -5,6 +5,7 @@ const verifyToken = require('../middleware/verifyToken');
 const { quoteOrder, fulfillOrder } = require('../services/checkoutService');
 const { createPayOSPayment, getPayOSPayment, verifyPayOSWebhook } = require('../services/paymentGatewayService');
 const { completePaidPayment } = require('../services/paymentFulfillmentService');
+const { isCustomerRole } = require('../utils/vip');
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ function createOrderCode() {
 
 router.post('/create', verifyToken, async (req, res) => {
   try {
-    if (req.user.role !== 'user') return res.status(403).json({ message: 'Chỉ tài khoản người dùng mới có thể thanh toán.' });
+    if (!isCustomerRole(req.user.role)) return res.status(403).json({ message: 'Chỉ tài khoản người dùng mới có thể thanh toán.' });
     const provider = String(req.body.provider || 'payos').toLowerCase();
     if (provider !== 'payos') return res.status(400).json({ message: 'Hệ thống hiện chỉ hỗ trợ thanh toán VietQR qua payOS.' });
 
@@ -48,7 +49,7 @@ router.post('/create', verifyToken, async (req, res) => {
 
 router.post('/free', verifyToken, async (req, res) => {
   try {
-    if (req.user.role !== 'user') return res.status(403).json({ message: 'Chỉ tài khoản người dùng mới có thể nhận vé.' });
+    if (!isCustomerRole(req.user.role)) return res.status(403).json({ message: 'Chỉ tài khoản người dùng mới có thể nhận vé.' });
 
     const { items, amount } = await quoteOrder(req.body.items);
     if (amount !== 0) {

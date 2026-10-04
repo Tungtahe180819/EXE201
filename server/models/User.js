@@ -14,9 +14,12 @@ const userSchema = new mongoose.Schema({
   bio: { type: String, default: '' },
   role: { 
     type: String, 
-    enum: ['user', 'admin_master', 'admin_support'], 
+    enum: ['user', 'user_vip', 'admin_master', 'admin_support'],
     default: 'user' 
   },
+  vipStartedAt: { type: Date, default: null },
+  vipExpiresAt: { type: Date, default: null },
+  vipSource: { type: String, enum: ['manual', 'payment', null], default: null },
   status: { type: String, enum: ['Active', 'Banned', 'Inactive'], default: 'Active' },
   resetPasswordToken: { type: String, select: false },
   resetPasswordExpires: { type: Date, select: false },

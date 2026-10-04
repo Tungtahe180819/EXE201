@@ -4,6 +4,8 @@ const Event = require('../models/Event');
 const { chatbotSupport } = require('../controllers/aiController');
 const { exportEventToICS } = require('../controllers/icsController'); // 🌟 Tích hợp controller xuất file .ics
 const jwt = require('jsonwebtoken');
+const verifyToken = require('../middleware/verifyToken');
+const requireVip = require('../middleware/requireVip');
 
 /**
  * Middleware: Xác thực JWT và kiểm tra quyền
@@ -32,7 +34,7 @@ const verifyRole = (requiredRoles) => (req, res, next) => {
 };
 
 // --- 1. ROUTES AI ---
-router.post('/chat', chatbotSupport);
+router.post('/chat', verifyToken, requireVip, chatbotSupport);
 
 // --- 2. ROUTES TÌM KIẾM VÀ BANNER NỔI BẬT (Đặt TRƯỚC /:id) ---
 router.get('/search', async (req, res) => {

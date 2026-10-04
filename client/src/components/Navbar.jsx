@@ -81,15 +81,16 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
                 {t.create}
               </Link>
           )}
-          {role === 'user' && (
+          {(role === 'user' || role === 'user_vip') && (
             <>
+              {role === 'user_vip' && <span className="hidden rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700 xl:inline">👑 VIP</span>}
               <Link to="/cart" className="font-semibold text-sm hover:text-indigo-600 transition">{t.cart}</Link>
               <Link to="/my-tickets" className="font-semibold text-sm hover:text-indigo-600 transition hidden sm:block">{t.tickets}</Link>
             </>
           )}
           {role ? (
             <div className="flex items-center gap-3">
-              {role === 'user' && <NotificationMenu />}
+              {(role === 'user' || role === 'user_vip') && <NotificationMenu />}
               <Link to="/profile" className="bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-bold px-4 py-2 rounded-xl text-sm">
                 {t.profile}
               </Link>

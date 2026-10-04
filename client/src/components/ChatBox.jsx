@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-export default function ChatBox() {
+export default function ChatBox({ role }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { sender: 'bot', text: 'Xin chào! Tôi là trợ lý AI của Eventverse. Tôi có thể giúp gì cho bạn hôm nay?' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+
+  if (role !== 'user_vip') return null;
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -20,7 +22,9 @@ export default function ChatBox() {
 
     try {
       // Gọi API chatbot hỗ trợ từ Backend
-      const res = await axios.post('/api/ai/chatbot', { userQuery: userMessage });
+      const res = await axios.post('/api/ai/chatbot', { userQuery: userMessage }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
       const botReply = res.data.reply || res.data.message || "Xin lỗi, tôi chưa hiểu rõ câu hỏi của bạn.";
       setMessages(prev => [...prev, { sender: 'bot', text: botReply }]);
     } catch (err) {

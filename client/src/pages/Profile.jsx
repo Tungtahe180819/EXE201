@@ -54,11 +54,28 @@ export default function Profile() {
           <div>
             <h1 className="text-2xl font-black">{profile.name}</h1>
             <p className="text-slate-500">{profile.email}</p>
-            <span className="inline-block mt-2 bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 text-xs px-3 py-1 rounded-full font-bold">
-              Thành viên Eventverse
+            <span className={`inline-block mt-2 text-xs px-3 py-1 rounded-full font-bold ${profile.role === 'user_vip' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300' : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300'}`}>
+              {profile.role === 'user_vip' ? `👑 VIP đến ${new Date(profile.vipExpiresAt).toLocaleDateString('vi-VN')}` : 'Thành viên Eventverse'}
             </span>
           </div>
         </div>
+
+        {(profile.role === 'user' || profile.role === 'user_vip') && (
+          <section className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="text-lg font-black">👑 Eventverse VIP — 250.000đ / năm</h2>
+                <p className="mt-1 text-sm">Mở khóa Lịch thông minh và Chatbot AI, đồng thời giữ nguyên toàn bộ quyền mua và quản lý vé.</p>
+              </div>
+              <span className="whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-black text-amber-700 shadow-sm dark:bg-amber-900 dark:text-amber-100">
+                {profile.role === 'user_vip' ? `Còn hạn đến ${new Date(profile.vipExpiresAt).toLocaleDateString('vi-VN')}` : 'Chưa kích hoạt'}
+              </span>
+            </div>
+            {profile.role !== 'user_vip' && (
+              <p className="mt-3 text-xs font-semibold">Giai đoạn hiện tại: sau khi xác nhận thanh toán, Admin Master sẽ kích hoạt VIP thủ công trong trang Quản lý tài khoản.</p>
+            )}
+          </section>
+        )}
 
         {message && <div className="bg-emerald-100 text-emerald-700 p-4 rounded-xl mb-6 font-semibold">{message}</div>}
 
