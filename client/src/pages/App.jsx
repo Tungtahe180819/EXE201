@@ -87,9 +87,9 @@ function App() {
             <Route path="/admin/feedback" element={role === "admin_master" ? <AdminFeedback /> : <Navigate to="/" />} />
             <Route path="/admin/revenue" element={role === "admin_master" ? <AdminRevenue /> : <Navigate to="/" />} />
 
-            {/* Bảo mật Route cho Admin Support & Master */}
+            {/* Admin Master và Admin Support cùng quản lý; chỉ Admin Support được tạo mới */}
             <Route path="/admin/events" element={(role === "admin_master" || role === "admin_support") ? <AdminEvents /> : <Navigate to="/" />} />
-            <Route path="/add" element={(role === "admin_master" || role === "admin_support") ? <AddEvent /> : <Navigate to="/" />} />
+            <Route path="/add" element={role === "admin_support" ? <AddEvent /> : <Navigate to="/admin/events" replace />} />
             <Route path="/edit-event/:id" element={(role === "admin_master" || role === "admin_support") ? <EditEvent /> : <Navigate to="/" />} />
 
             {/* Chuyển hướng về trang chủ nếu nhập sai URL */}

@@ -80,14 +80,14 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
             </>
           )}
           {(role === 'admin_support' || role === 'admin_master') && (
-            <>
-              <Link to="/admin/events" className="font-semibold text-sm hover:text-indigo-600 transition hidden lg:block">
-                {t.manage}
-              </Link>
+            <Link to="/admin/events" className="font-semibold text-sm hover:text-indigo-600 transition hidden lg:block">
+              {t.manage}
+            </Link>
+          )}
+          {role === 'admin_support' && (
               <Link to="/add" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-md transition">
                 {t.create}
               </Link>
-            </>
           )}
           {role === 'user' && (
             <>

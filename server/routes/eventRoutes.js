@@ -84,7 +84,8 @@ router.get('/categories', async (req, res) => {
 router.post('/export-ics', exportEventToICS);
 
 // --- 4. ROUTES QUẢN LÝ SỰ KIỆN CƠ BẢN ---
-router.post('/', verifyRole(['admin_master', 'admin_support']), async (req, res) => {
+// Admin Support phụ trách tạo sự kiện; Admin Master chỉ quản lý sự kiện đã có.
+router.post('/', verifyRole(['admin_support']), async (req, res) => {
     try {
         const {
             title, category, description, startDate, endDate,
