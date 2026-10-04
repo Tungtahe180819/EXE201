@@ -2,8 +2,9 @@ const express = require('express');
 const crypto = require('crypto');
 const Payment = require('../models/Payment');
 const verifyToken = require('../middleware/verifyToken');
-const { quoteOrder, fulfillOrder } = require('../services/checkoutService');
-const { createPayOSPayment, verifyPayOSWebhook } = require('../services/paymentGatewayService');
+const { quoteOrder } = require('../services/checkoutService');
+const { createPayOSPayment, getPayOSPayment, verifyPayOSWebhook } = require('../services/paymentGatewayService');
+const { completePaidPayment } = require('../services/paymentFulfillmentService');
 
 const router = express.Router();
 
@@ -67,49 +68,44 @@ router.post('/webhook/payos', async (req, res) => {
     return res.status(200).json({ success: true });
   }
 
-  const claimedPayment = await Payment.findOneAndUpdate(
-    { _id: payment._id, status: 'Pending' },
-    {
-      $set: {
-        status: 'Processing',
-        transactionId: String(webhookData.reference || webhookData.paymentLinkId || ''),
-        providerResponse: { ...payment.providerResponse, paidWebhook: webhookData }
-      }
-    },
-    { returnDocument: 'after' }
-  );
-  if (!claimedPayment) return res.status(200).json({ success: true });
-
   try {
-    const result = await fulfillOrder({
-      userId: claimedPayment.userId,
-      rawItems: claimedPayment.items,
-      io: req.io,
-      paymentMethod: 'bank',
-      paymentReference: claimedPayment.orderCode
+    await completePaidPayment({
+      payment,
+      transactionId: webhookData.reference || webhookData.paymentLinkId,
+      providerData: webhookData,
+      io: req.io
     });
-    claimedPayment.status = 'Paid';
-    claimedPayment.paidAt = new Date();
-    claimedPayment.tickets = result.tickets.map(ticket => ticket._id);
-    claimedPayment.emailSent = result.emailSent;
-    claimedPayment.emailMessage = result.emailMessage;
-    await claimedPayment.save();
-    req.io?.emit('payment_updated', { orderCode: claimedPayment.orderCode, status: 'Paid' });
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error(`Không thể phát hành vé cho đơn ${orderCode}:`, error.message);
-    await Payment.findByIdAndUpdate(claimedPayment._id, {
-      $set: { status: 'Pending', 'providerResponse.fulfillmentError': error.message }
-    });
     return res.status(500).json({ success: false, message: 'Chưa thể phát hành vé, payOS sẽ gửi lại webhook.' });
   }
 });
 
 router.get('/status/:orderCode', verifyToken, async (req, res) => {
-  const payment = await Payment.findOne({ orderCode: req.params.orderCode, userId: req.user.id })
-    .select('orderCode amount provider status transactionId tickets paidAt emailSent emailMessage createdAt');
+  let payment = await Payment.findOne({ orderCode: req.params.orderCode, userId: req.user.id });
   if (!payment) return res.status(404).json({ message: 'Không tìm thấy giao dịch.' });
-  return res.json(payment);
+
+  if (payment.status === 'Pending') {
+    try {
+      const payOSPayment = await getPayOSPayment(payment.orderCode);
+      if (payOSPayment.status === 'PAID' && Number(payOSPayment.amountPaid) >= payment.amount) {
+        const transaction = payOSPayment.transactions?.[payOSPayment.transactions.length - 1];
+        payment = await completePaidPayment({
+          payment,
+          transactionId: transaction?.reference || payOSPayment.id,
+          providerData: payOSPayment,
+          io: req.io
+        });
+      }
+    } catch (error) {
+      console.error(`Không thể đối soát đơn ${payment.orderCode} với payOS:`, error.message);
+    }
+  }
+
+  const publicPayment = await Payment.findById(payment._id)
+    .select('orderCode amount provider status transactionId tickets paidAt emailSent emailMessage createdAt');
+  return res.json(publicPayment);
 });
 
 module.exports = router;

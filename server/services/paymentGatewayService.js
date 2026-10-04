@@ -68,8 +68,16 @@ async function verifyPayOSWebhook(payload) {
   return getPayOS().webhooks.verify(payload);
 }
 
+async function getPayOSPayment(orderCode) {
+  const numericOrderCode = Number(orderCode);
+  if (!Number.isSafeInteger(numericOrderCode) || numericOrderCode <= 0) {
+    throw new Error('Mã đơn hàng payOS không hợp lệ.');
+  }
+  return getPayOS().paymentRequests.get(numericOrderCode);
+}
+
 async function confirmPayOSWebhook(webhookUrl) {
   return getPayOS().webhooks.confirm(webhookUrl);
 }
 
-module.exports = { createPayOSPayment, verifyPayOSWebhook, confirmPayOSWebhook };
+module.exports = { createPayOSPayment, getPayOSPayment, verifyPayOSWebhook, confirmPayOSWebhook };
