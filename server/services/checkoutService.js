@@ -68,7 +68,13 @@ async function fulfillOrder({ userId, rawItems, io, paymentMethod = 'local', pay
     const populatedTickets = await Ticket.find({ _id: { $in: createdTickets.map(ticket => ticket._id) } })
       .populate('eventId', 'title image startDate location').sort({ createdAt: -1 });
     const total = createdTickets.reduce((sum, ticket) => sum + ticket.totalPrice, 0);
-    await Notification.create({ userId: user._id, type: 'purchase', message: `Thanh toán thành công ${createdTickets.length} mã vé. Tổng tiền: ${total.toLocaleString('vi-VN')}₫.` });
+    await Notification.create({
+      userId: user._id,
+      type: 'purchase',
+      message: total === 0
+        ? `Nhận thành công ${createdTickets.length} mã vé miễn phí.`
+        : `Thanh toán thành công ${createdTickets.length} mã vé. Tổng tiền: ${total.toLocaleString('vi-VN')}₫.`
+    });
 
     let emailSent = false;
     let emailMessage = 'Thanh toán thành công nhưng chưa gửi được email. Bạn vẫn có thể xem vé trong mục Vé của tôi.';

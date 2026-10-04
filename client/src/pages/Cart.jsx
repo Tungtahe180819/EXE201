@@ -76,6 +76,16 @@ export default function Cart() {
     try {
       setPaying(true);
       const items = cart.map(item => ({ eventId: item._id, quantity: item.quantity, ticketType: item.category }));
+      if (totalPrice === 0) {
+        const { data } = await axios.post('/api/payments/free', { items }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCompletedPayment(data);
+        localStorage.removeItem('cart');
+        setCart([]);
+        toast.success(data.message);
+        return;
+      }
       const { data } = await axios.post('/api/payments/create', { items, provider: 'payos' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -100,9 +110,9 @@ export default function Cart() {
     <div className="mx-auto max-w-2xl p-10 text-center">
       <div className="rounded-3xl border border-emerald-300 bg-emerald-50 p-10 text-slate-900 shadow-xl">
         <div className="mb-4 text-6xl">✅</div>
-        <h1 className="text-3xl font-black text-emerald-700">Thanh toán thành công</h1>
+        <h1 className="text-3xl font-black text-emerald-700">{completedPayment.free ? 'Nhận vé miễn phí thành công' : 'Thanh toán thành công'}</h1>
         <p className="mt-3">{completedPayment.emailSent ? 'Vé và mã vé đã được gửi tới email đăng ký của bạn.' : completedPayment.emailMessage || 'Vé đã được phát hành. Bạn có thể xem vé trong mục Vé của tôi.'}</p>
-        <p className="mt-2 text-sm text-slate-500">Mã đơn: {completedPayment.orderCode}</p>
+        {completedPayment.orderCode && <p className="mt-2 text-sm text-slate-500">Mã đơn: {completedPayment.orderCode}</p>}
         <Link to="/my-tickets" className="mt-6 inline-block rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white">Xem vé của tôi</Link>
       </div>
     </div>
@@ -139,16 +149,16 @@ export default function Cart() {
       <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-indigo-600 p-6 text-white shadow-xl sm:flex-row">
         <div><p className="text-sm text-indigo-200">Tổng thanh toán</p><p className="text-3xl font-black">{formatEventPrice(totalPrice)}</p></div>
         <button disabled={paying} onClick={handleCheckout} className="rounded-xl bg-white px-8 py-3 font-bold text-indigo-600 disabled:opacity-60">
-          {paying ? 'Đang tạo mã...' : bankPayment ? 'Tạo lại mã VietQR' : 'Thanh toán VietQR qua payOS'}
+          {paying ? (totalPrice === 0 ? 'Đang phát hành vé...' : 'Đang tạo mã...') : totalPrice === 0 ? 'Nhận vé miễn phí' : bankPayment ? 'Tạo lại mã VietQR' : 'Thanh toán VietQR qua payOS'}
         </button>
       </div>
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <h2 className="mb-4 text-lg font-black">Phương thức thanh toán</h2>
+        <h2 className="mb-4 text-lg font-black">{totalPrice === 0 ? 'Thông tin vé' : 'Phương thức thanh toán'}</h2>
         <div className="rounded-xl border border-indigo-600 bg-indigo-50 p-4 font-bold text-indigo-700 dark:bg-indigo-950">
-          ✅ VietQR • Xác nhận tự động bởi payOS
+          {totalPrice === 0 ? '🎁 Vé miễn phí • Không cần thanh toán' : '✅ VietQR • Xác nhận tự động bởi payOS'}
         </div>
-        <p className="mt-4 text-xs text-slate-500">Quét mã bằng ứng dụng ngân hàng và giữ nguyên số tiền, nội dung chuyển khoản. Vé sẽ được phát hành tự động khi payOS xác nhận giao dịch.</p>
+        <p className="mt-4 text-xs text-slate-500">{totalPrice === 0 ? 'Nhấn “Nhận vé miễn phí” để hệ thống phát hành mã vé và gửi về email đăng ký.' : 'Quét mã bằng ứng dụng ngân hàng và giữ nguyên số tiền, nội dung chuyển khoản. Vé sẽ được phát hành tự động khi payOS xác nhận giao dịch.'}</p>
       </div>
 
       {bankPayment && (

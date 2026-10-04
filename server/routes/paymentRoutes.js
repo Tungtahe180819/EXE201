@@ -2,7 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const Payment = require('../models/Payment');
 const verifyToken = require('../middleware/verifyToken');
-const { quoteOrder } = require('../services/checkoutService');
+const { quoteOrder, fulfillOrder } = require('../services/checkoutService');
 const { createPayOSPayment, getPayOSPayment, verifyPayOSWebhook } = require('../services/paymentGatewayService');
 const { completePaidPayment } = require('../services/paymentFulfillmentService');
 
@@ -42,6 +42,39 @@ router.post('/create', verifyToken, async (req, res) => {
     }
   } catch (error) {
     console.error('Không thể tạo thanh toán payOS:', error.message);
+    return res.status(error.status || 400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/free', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'user') return res.status(403).json({ message: 'Chỉ tài khoản người dùng mới có thể nhận vé.' });
+
+    const { items, amount } = await quoteOrder(req.body.items);
+    if (amount !== 0) {
+      return res.status(400).json({ message: 'Đơn hàng có vé trả phí. Vui lòng thanh toán qua VietQR payOS.' });
+    }
+
+    const result = await fulfillOrder({
+      userId: req.user.id,
+      rawItems: items,
+      io: req.io,
+      paymentMethod: 'local',
+      paymentReference: `FREE-${createOrderCode()}`
+    });
+
+    return res.status(201).json({
+      success: true,
+      free: true,
+      status: 'Paid',
+      amount: 0,
+      ...result,
+      message: result.emailSent
+        ? 'Nhận vé miễn phí thành công! Vé đã được gửi qua email.'
+        : 'Nhận vé miễn phí thành công! Bạn có thể xem vé trong mục Vé của tôi.'
+    });
+  } catch (error) {
+    console.error('Không thể phát hành vé miễn phí:', error.message);
     return res.status(error.status || 400).json({ success: false, message: error.message });
   }
 });
