@@ -35,6 +35,7 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
   };
 
   return (
+    <>
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
         
@@ -64,15 +65,6 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
           ) : (
             <Link to="/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.feedback}</Link>
           )}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={theme === 'dark' ? t.lightTheme : t.darkTheme}
-            title={theme === 'dark' ? t.lightTheme : t.darkTheme}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-100 text-lg shadow-sm transition hover:scale-105 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
-          >
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
           {role === 'admin_master' && (
             <>
               <Link to="/admin/dashboard" className="font-semibold text-sm hover:text-indigo-600 transition hidden lg:block">{t.dashboard}</Link>
@@ -114,5 +106,15 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
         </div>
       </div>
     </header>
+    <button
+      type="button"
+      onClick={toggleTheme}
+      aria-label={theme === 'dark' ? t.lightTheme : t.darkTheme}
+      title={theme === 'dark' ? t.lightTheme : t.darkTheme}
+      className="fixed bottom-6 left-6 z-[60] grid h-12 w-12 place-items-center rounded-full border border-slate-200 bg-white text-xl shadow-lg transition hover:scale-110 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+    >
+      {theme === 'dark' ? '☀️' : '🌙'}
+    </button>
+    </>
   );
 }
