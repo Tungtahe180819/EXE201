@@ -12,7 +12,7 @@ export function TicketQRCard({ ticket }) {
     <section className="rounded-3xl border border-indigo-100 bg-indigo-50 p-6 text-center">
       <h2 className="mb-2 text-lg font-black text-indigo-700">Mã vé Eventverse</h2>
       <p className="mb-5 text-sm text-slate-500">Xuất trình mã QR này khi tham gia sự kiện.</p>
-      <div className="mx-auto w-fit rounded-2xl bg-white p-4 shadow-sm">
+      <div className="keep-light-surface mx-auto w-fit rounded-2xl bg-white p-4 shadow-sm">
         <QRCodeSVG value={qrPayload} size={220} level="H" includeMargin />
       </div>
       <p className="mt-5 font-mono text-lg font-black tracking-wider text-slate-900">{ticket.ticketCode}</p>

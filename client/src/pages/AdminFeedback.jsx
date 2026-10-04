@@ -37,7 +37,7 @@ export default function AdminFeedback() {
         <h1 className="text-3xl font-black">Góp ý từ khách hàng</h1>
         <p className="mt-1 text-slate-500">Tổng cộng {feedbacks.length} phản hồi.</p>
       </div>
-      {feedbacks.length === 0 ? <p className="rounded-2xl border bg-white p-10 text-center text-slate-500">Chưa có góp ý nào.</p> : (
+      {feedbacks.length === 0 ? <p className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">Chưa có góp ý nào.</p> : (
         <div className="grid gap-4">
           {feedbacks.map(item => (
             <article key={item._id} className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -46,7 +46,7 @@ export default function AdminFeedback() {
                   <h2 className="font-black">{item.name} · {'⭐'.repeat(item.rating)}</h2>
                   <p className="text-sm text-slate-500">{item.email} · {new Date(item.createdAt).toLocaleString('vi-VN')}</p>
                 </div>
-                <select value={item.status} onChange={event => updateStatus(item._id, event.target.value)} className="rounded-xl border px-3 py-2 font-bold">
+                <select value={item.status} onChange={event => updateStatus(item._id, event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 font-bold dark:border-slate-700 dark:bg-slate-800">
                   {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </div>

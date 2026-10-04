@@ -52,7 +52,7 @@ export default function AdminEvents() {
   return (
     <div className="p-8 max-w-5xl mx-auto min-h-screen">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800">Quản lý sự kiện</h2>
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-slate-100">Quản lý sự kiện</h2>
         <div className="flex items-center gap-3">
           <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full font-semibold">
             Tổng: {events.length}
@@ -68,8 +68,8 @@ export default function AdminEvents() {
       {events.length > 0 ? (
         <div className="space-y-4">
           {events.map(event => (
-            <div key={event._id} className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition hover:shadow-md">
-              <span className="font-bold text-lg text-gray-700">{event.title}</span>
+            <div key={event._id} className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+              <span className="font-bold text-lg text-gray-700 dark:text-slate-100">{event.title}</span>
               <div className="flex gap-4">
                 <button onClick={() => navigate(`/events/${event._id}`)} className="text-slate-600 font-semibold hover:bg-slate-50 px-4 py-2 rounded-lg transition">
                   Xem

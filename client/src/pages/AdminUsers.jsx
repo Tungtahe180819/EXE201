@@ -72,7 +72,7 @@ export default function AdminUsers() {
       </div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border dark:border-slate-800 overflow-x-auto">
         <table className="w-full min-w-[980px] text-left">
-          <thead className="bg-gray-50 border-b">
+          <thead className="border-b border-slate-200 bg-gray-50 dark:border-slate-800 dark:bg-slate-800">
             <tr>
               <th className="p-4">Tên</th>
               <th className="p-4">Email</th>
@@ -84,7 +84,7 @@ export default function AdminUsers() {
           <tbody>
             {users.length > 0 ? (
               users.map(user => (
-                <tr key={user._id} className="border-b">
+                <tr key={user._id} className="border-b border-slate-200 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/70">
                   <td className="p-4 font-bold">{user.name || user.username || 'Chưa cập nhật'}</td>
                   <td className="p-4">{user.email}</td>
                   <td className="p-4">

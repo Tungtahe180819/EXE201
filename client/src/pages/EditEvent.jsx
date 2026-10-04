@@ -87,7 +87,7 @@ export default function EditEvent() {
   if (loading) return <div className="p-20 text-center">Đang tải sự kiện...</div>;
 
   return (
-    <div className="mx-auto my-10 max-w-3xl rounded-3xl border bg-white p-8 shadow-sm">
+    <div className="mx-auto my-10 max-w-3xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="mb-8 flex items-center justify-between">
         <div><p className="text-sm font-bold uppercase tracking-wider text-indigo-600">Quản lý sự kiện</p><h1 className="text-3xl font-black">Chỉnh sửa sự kiện</h1></div>
         <button type="button" onClick={() => navigate('/admin/events')} className="font-bold text-slate-500">Quay lại</button>
@@ -98,7 +98,7 @@ export default function EditEvent() {
           <label className="font-semibold">Tên sự kiện<input required value={event.title} onChange={e => setField('title', e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal" /></label>
           <label className="font-semibold">Danh mục<select required value={event.category} onChange={e => setField('category', e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal"><option value="Âm nhạc">Âm nhạc</option><option value="Công nghệ">Công nghệ</option><option value="Gaming">Gaming</option><option value="Thể thao">Thể thao</option><option value="Ẩm thực">Ẩm thực</option><option value="Nghệ thuật">Nghệ thuật</option><option value="Giáo dục">Giáo dục</option><option value="Khác">Khác</option></select></label>
         </div>
-        <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 space-y-3">
+        <div className="space-y-3 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-900 dark:bg-indigo-950/40">
           <label className="flex items-center gap-3 font-semibold"><input type="checkbox" checked={Boolean(event.recurrence?.isRecurring)} onChange={e => setField('recurrence', { ...event.recurrence, isRecurring: e.target.checked, frequency: e.target.checked ? (event.recurrence?.frequency === 'none' ? 'weekly' : event.recurrence?.frequency) : 'none' })} /> Sự kiện lặp lại</label>
           {event.recurrence?.isRecurring && <div className="grid gap-3 md:grid-cols-2"><select value={event.recurrence.frequency} onChange={e => setField('recurrence', { ...event.recurrence, frequency: e.target.value })} className="rounded-xl border p-3"><option value="daily">Hằng ngày</option><option value="weekly">Hằng tuần</option><option value="monthly">Hằng tháng</option></select><input type="date" value={event.recurrence.untilDate || ''} onChange={e => setField('recurrence', { ...event.recurrence, untilDate: e.target.value })} className="rounded-xl border p-3" /></div>}
           <label className="block font-semibold">Múi giờ<select value={event.timezone || 'Asia/Ho_Chi_Minh'} onChange={e => setField('timezone', e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal"><option value="Asia/Ho_Chi_Minh">Việt Nam (UTC+7)</option><option value="Asia/Bangkok">Bangkok (UTC+7)</option><option value="Asia/Singapore">Singapore (UTC+8)</option><option value="UTC">UTC</option></select></label>
@@ -116,7 +116,7 @@ export default function EditEvent() {
           <input required type="url" value={event.image || ''} onChange={e => setField('image', e.target.value.trim())} className="mt-2 w-full rounded-xl border p-3 font-normal" />
         </label>
         {event.image && (
-          <div className="overflow-hidden rounded-2xl border bg-slate-50">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950">
             <img
               src={event.image}
               alt="Xem trước ảnh sự kiện"

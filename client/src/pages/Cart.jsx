@@ -145,15 +145,15 @@ export default function Cart() {
       <h1 className="mb-8 text-3xl font-black">Giỏ hàng của bạn</h1>
       <div className="space-y-4">
         {cart.map(item => (
-          <div key={item._id} className="flex flex-col gap-4 rounded-2xl border bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+          <div key={item._id} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 md:flex-row md:items-center md:justify-between">
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-lg font-bold">{item.title}</h2>
-              <p className="text-sm text-slate-500">{formatEventPrice(item.price)} {item.itemType === 'vip' ? '/ 1 năm' : '/ vé'}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{formatEventPrice(item.price)} {item.itemType === 'vip' ? '/ 1 năm' : '/ vé'}</p>
             </div>
             <div className="flex items-center gap-3">
-              {item.itemType !== 'vip' && <button onClick={() => updateQuantity(item, -1)} className="h-9 w-9 rounded-lg border font-bold">−</button>}
+              {item.itemType !== 'vip' && <button onClick={() => updateQuantity(item, -1)} className="h-9 w-9 rounded-lg border border-slate-200 font-bold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">−</button>}
               <span className="w-8 text-center font-black">{item.quantity}</span>
-              {item.itemType !== 'vip' && <button onClick={() => updateQuantity(item, 1)} className="h-9 w-9 rounded-lg border font-bold">+</button>}
+              {item.itemType !== 'vip' && <button onClick={() => updateQuantity(item, 1)} className="h-9 w-9 rounded-lg border border-slate-200 font-bold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">+</button>}
               <button onClick={() => removeItem(item._id)} className="ml-2 font-bold text-red-500">Xóa</button>
             </div>
             <p className="text-lg font-black text-indigo-600">{formatEventPrice((Number(item.price) || 0) * item.quantity)}</p>
@@ -163,7 +163,7 @@ export default function Cart() {
 
       <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-indigo-600 p-6 text-white shadow-xl sm:flex-row">
         <div><p className="text-sm text-indigo-200">Tổng thanh toán</p><p className="text-3xl font-black">{formatEventPrice(totalPrice)}</p></div>
-        <button disabled={paying} onClick={handleCheckout} className="rounded-xl bg-white px-8 py-3 font-bold text-indigo-600 disabled:opacity-60">
+        <button disabled={paying} onClick={handleCheckout} className="keep-light-surface rounded-xl bg-white px-8 py-3 font-bold text-indigo-600 shadow-sm hover:bg-indigo-50 disabled:opacity-60">
           {paying ? (totalPrice === 0 ? 'Đang phát hành vé...' : 'Đang tạo mã...') : totalPrice === 0 ? 'Nhận vé miễn phí' : bankPayment ? 'Tạo lại mã VietQR' : 'Thanh toán VietQR qua payOS'}
         </button>
       </div>
@@ -179,8 +179,8 @@ export default function Cart() {
       {bankPayment && (
         <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center text-slate-900">
           <h2 className="text-xl font-black">Quét mã để chuyển khoản</h2>
-          <img src={bankPayment.qrDataURL} alt="Mã VietQR thanh toán" className="mx-auto my-4 max-h-[520px] rounded-xl" />
-          <div className="mx-auto max-w-lg space-y-1 rounded-xl bg-white p-4 text-left shadow-sm">
+          <img src={bankPayment.qrDataURL} alt="Mã VietQR thanh toán" className="keep-light-surface mx-auto my-4 max-h-[520px] rounded-xl p-2" />
+          <div className="keep-light-surface mx-auto max-w-lg space-y-1 rounded-xl bg-white p-4 text-left shadow-sm">
             <p><strong>Ngân hàng:</strong> VietQR / payOS</p>
             <p><strong>Số tài khoản:</strong> {bankPayment.bankInfo?.accountNo}</p>
             <p><strong>Chủ tài khoản:</strong> {bankPayment.bankInfo?.accountName}</p>

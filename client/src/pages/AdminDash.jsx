@@ -53,7 +53,7 @@ export default function AdminDash() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 md:px-8">
+    <div className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 dark:bg-slate-950 dark:text-slate-100 md:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -62,15 +62,15 @@ export default function AdminDash() {
             <p className="mt-1 text-sm text-slate-500">Theo dõi hoạt động và hiệu quả kinh doanh của Eventverse.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link to="/admin/users" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200">Người dùng</Link>
-            <Link to="/admin/feedback" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200">Nhận góp ý</Link>
-            <Link to="/admin/events" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200">Sự kiện</Link>
+            <Link to="/admin/users" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">Người dùng</Link>
+            <Link to="/admin/feedback" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">Nhận góp ý</Link>
+            <Link to="/admin/events" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">Sự kiện</Link>
           </div>
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {cards.map(card => (
-            <div key={card.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div key={card.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl text-xl ${card.color}`}>{card.icon}</div>
               <p className="text-sm font-semibold text-slate-500">{card.label}</p>
               <p className="mt-1 text-3xl font-black">{card.value}</p>
@@ -79,7 +79,7 @@ export default function AdminDash() {
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:col-span-2">
             <div className="mb-5 flex items-center justify-between"><h2 className="text-xl font-black">Doanh thu theo tháng</h2><span className="text-xs font-bold text-slate-400">Tối đa 12 tháng</span></div>
             <div className="h-80">
               {dashboard.chartData.length ? (
@@ -96,7 +96,7 @@ export default function AdminDash() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <h2 className="mb-5 text-xl font-black">Hiệu suất</h2>
             <div className="mb-6 flex justify-center">
               <div className="flex h-36 w-36 items-center justify-center rounded-full border-[14px] border-indigo-100 text-center">
@@ -105,26 +105,26 @@ export default function AdminDash() {
             </div>
             <div className="space-y-3">
               {dashboard.usersByRole.map(item => (
-                <div key={item.role} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"><span className="text-sm font-semibold">{item.role}</span><span className="font-black text-indigo-600">{item.count}</span></div>
+                <div key={item.role} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-800"><span className="text-sm font-semibold">{item.role}</span><span className="font-black text-indigo-600 dark:text-indigo-400">{item.count}</span></div>
               ))}
             </div>
           </section>
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b p-5"><h2 className="text-xl font-black">Sự kiện gần đây</h2><Link to="/admin/events" className="text-sm font-bold text-indigo-600">Xem tất cả</Link></div>
             <div className="divide-y">
               {dashboard.recentEvents.map(event => (
                 <div key={event._id} className="flex items-center justify-between gap-4 p-4">
                   <div><p className="font-bold">{event.title}</p><p className="text-xs text-slate-500">{event.category} · {formatDate(event.startDate)}</p></div>
-                  <span className="whitespace-nowrap rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600">{event.bookedSlots}/{event.totalSlots} vé</span>
+                  <span className="whitespace-nowrap rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300">{event.bookedSlots}/{event.totalSlots} vé</span>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="border-b p-5"><h2 className="text-xl font-black">Giao dịch gần đây</h2></div>
             <div className="divide-y">
               {dashboard.recentTickets.length ? dashboard.recentTickets.map(ticket => (

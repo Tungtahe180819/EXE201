@@ -6,13 +6,29 @@
   :root {
     --accent: #2563eb; /* Blue-600 */
     --bg-light: #f8fafc; /* Blue-50 */
+    --ev-bg: #f8fafc;
+    --ev-surface: #ffffff;
+    --ev-surface-soft: #f1f5f9;
+    --ev-border: #e2e8f0;
+    --ev-text: #0f172a;
+    --ev-muted: #64748b;
+  }
+
+  :root.dark {
+    --ev-bg: #020617;
+    --ev-surface: #0f172a;
+    --ev-surface-soft: #172033;
+    --ev-border: #263449;
+    --ev-text: #f8fafc;
+    --ev-muted: #a8b3c7;
   }
   
   body {
     margin: 0;
-    background-color: var(--bg-light);
-    color: #1e293b;
+    background-color: var(--ev-bg);
+    color: var(--ev-text);
     font-family: 'Inter', system-ui, sans-serif;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 }
 
@@ -27,4 +43,186 @@
 /* Style cho các nút bấm đồng bộ */
 .btn-primary {
   @apply bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all;
+}
+
+/*
+ * Dark-mode safety net.
+ * Một số màn hình cũ dùng màu sáng cố định. Các quy tắc dưới đây đồng bộ
+ * toàn bộ surface, bảng và form mà không làm thay đổi bố cục component.
+ */
+html.dark,
+html.dark body,
+html.dark #root {
+  background: var(--ev-bg);
+  color: var(--ev-text);
+}
+
+html.dark .bg-white {
+  background-color: var(--ev-surface);
+}
+
+html.dark .bg-gray-50,
+html.dark .bg-slate-50 {
+  background-color: var(--ev-bg);
+}
+
+html.dark .bg-gray-100,
+html.dark .bg-slate-100 {
+  background-color: var(--ev-surface-soft);
+}
+
+html.dark .border,
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-slate-100,
+html.dark .border-slate-200 {
+  border-color: var(--ev-border);
+}
+
+html.dark .divide-y > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--ev-border);
+}
+
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700 {
+  color: var(--ev-text);
+}
+
+html.dark .text-gray-600,
+html.dark .text-gray-500,
+html.dark .text-slate-600,
+html.dark .text-slate-500 {
+  color: var(--ev-muted);
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  color: var(--ev-text);
+  background-color: var(--ev-surface-soft);
+  border-color: var(--ev-border);
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #718096;
+}
+
+html.dark option {
+  color: var(--ev-text);
+  background-color: var(--ev-surface);
+}
+
+html.dark table {
+  color: var(--ev-text);
+  background-color: var(--ev-surface);
+}
+
+html.dark thead,
+html.dark tbody,
+html.dark tr,
+html.dark th,
+html.dark td {
+  border-color: var(--ev-border);
+}
+
+html.dark .shadow-sm,
+html.dark .shadow-md,
+html.dark .shadow-lg,
+html.dark .shadow-xl,
+html.dark .shadow-2xl {
+  --tw-shadow-color: rgb(0 0 0 / 0.45);
+}
+
+html.dark .recharts-cartesian-grid line {
+  stroke: #334155;
+}
+
+html.dark .recharts-cartesian-axis-tick text,
+html.dark .recharts-legend-item-text {
+  fill: #cbd5e1;
+  color: #cbd5e1 !important;
+}
+
+html.dark .recharts-default-tooltip {
+  color: var(--ev-text);
+  background: var(--ev-surface) !important;
+  border-color: var(--ev-border) !important;
+  border-radius: 0.75rem;
+}
+
+html.dark .bg-blue-50,
+html.dark .bg-indigo-50,
+html.dark .bg-violet-50 {
+  background-color: rgb(49 46 129 / 0.32);
+}
+
+html.dark .bg-emerald-50,
+html.dark .bg-green-50 {
+  background-color: rgb(6 78 59 / 0.32);
+}
+
+html.dark .bg-amber-50,
+html.dark .bg-yellow-50 {
+  background-color: rgb(120 53 15 / 0.3);
+}
+
+html.dark .bg-rose-50,
+html.dark .bg-red-50 {
+  background-color: rgb(127 29 29 / 0.3);
+}
+
+html.dark .react-datepicker,
+html.dark .react-datepicker__header,
+html.dark .react-datepicker__time-container,
+html.dark .react-datepicker__time,
+html.dark .react-datepicker__time-box,
+html.dark .react-datepicker__month-container {
+  color: var(--ev-text);
+  background-color: var(--ev-surface);
+  border-color: var(--ev-border);
+}
+
+html.dark .react-datepicker__current-month,
+html.dark .react-datepicker-time__header,
+html.dark .react-datepicker-year-header,
+html.dark .react-datepicker__day-name,
+html.dark .react-datepicker__day,
+html.dark .react-datepicker__time-name {
+  color: var(--ev-text);
+}
+
+html.dark .react-datepicker__day:hover,
+html.dark .react-datepicker__time-list-item:hover {
+  color: #ffffff;
+  background-color: #4f46e5 !important;
+}
+
+html.dark .fc {
+  --fc-page-bg-color: var(--ev-surface);
+  --fc-neutral-bg-color: var(--ev-surface-soft);
+  --fc-neutral-text-color: var(--ev-muted);
+  --fc-border-color: var(--ev-border);
+  --fc-button-bg-color: #4f46e5;
+  --fc-button-border-color: #4f46e5;
+  --fc-button-hover-bg-color: #4338ca;
+  --fc-today-bg-color: rgb(79 70 229 / 0.18);
+}
+
+/* Các vùng cần nền trắng thật để QR dễ quét và CTA vẫn nổi bật. */
+html.dark .keep-light-surface {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
 }

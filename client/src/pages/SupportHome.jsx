@@ -24,14 +24,14 @@ export default function SupportHome() {
           + Tạo sự kiện mới
         </Link>
       </div>
-      <table className="w-full border bg-white rounded-xl overflow-hidden">
-        <thead><tr className="bg-gray-100 text-left">
+      <table className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <thead><tr className="bg-gray-100 text-left dark:bg-slate-800">
           <th className="p-4">Tên sự kiện</th>
           <th className="p-4">Hành động</th>
         </tr></thead>
         <tbody>
           {events.map(ev => (
-            <tr key={ev._id} className="border-b">
+            <tr key={ev._id} className="border-b border-slate-200 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/70">
               <td className="p-4">{ev.title}</td>
               <td className="p-4 flex gap-2">
                 <Link to={`/events/${ev._id}`} className="text-blue-600 font-semibold">Xem chi tiết</Link>

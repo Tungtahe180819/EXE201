@@ -24,7 +24,7 @@ export default function TicketDetail() {
   if (!ticket) return <div className="p-20 text-center">Không tìm thấy thông tin vé!</div>;
 
   return (
-    <div className="mx-auto mt-10 max-w-2xl rounded-3xl bg-white p-10 shadow-lg">
+    <div className="mx-auto mt-10 max-w-2xl rounded-3xl border border-slate-200 bg-white p-10 shadow-lg dark:border-slate-800 dark:bg-slate-900">
       <button onClick={() => navigate(-1)} className="mb-6 font-bold text-blue-600">← Quay lại</button>
       <h1 className="mb-6 text-3xl font-black">{ticket.eventId?.title || 'Vé sự kiện'}</h1>
       <div className="mb-8 space-y-3">

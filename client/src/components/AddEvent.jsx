@@ -72,7 +72,7 @@ export default function AddEvent() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-xl max-w-lg mx-auto mt-10 space-y-4">
+        <form onSubmit={handleSubmit} className="mx-auto mt-10 max-w-lg space-y-4 rounded-2xl border border-slate-200 bg-white p-8 shadow-xl dark:border-slate-800 dark:bg-slate-900">
             <h2 className="text-2xl font-bold mb-6">Tạo sự kiện mới</h2>
             
             <input required className="w-full p-3 border rounded-xl" placeholder="Tên sự kiện" 
@@ -112,7 +112,7 @@ export default function AddEvent() {
 
             <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-semibold text-gray-600">Thời gian bắt đầu</label>
+                    <label className="block text-sm font-semibold text-gray-600 dark:text-slate-300">Thời gian bắt đầu</label>
                     <DatePicker 
                         selected={formData.startDate}
                         onChange={(date) => setFormData({ ...formData, startDate: date })}
@@ -124,7 +124,7 @@ export default function AddEvent() {
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-semibold text-gray-600">Thời gian kết thúc</label>
+                    <label className="block text-sm font-semibold text-gray-600 dark:text-slate-300">Thời gian kết thúc</label>
                     <DatePicker 
                         selected={formData.endDate}
                         onChange={(date) => setFormData({ ...formData, endDate: date })}
@@ -137,7 +137,7 @@ export default function AddEvent() {
                 </div>
             </div>
 
-            <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 space-y-3">
+            <div className="space-y-3 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-900 dark:bg-indigo-950/40">
                 <label className="flex items-center gap-3 font-semibold">
                     <input type="checkbox" checked={formData.isRecurring} onChange={e => setFormData({ ...formData, isRecurring: e.target.checked })} />
                     Sự kiện lặp lại
