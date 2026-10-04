@@ -20,11 +20,15 @@ export default function ChatBox() {
 
     try {
       // Gọi API chatbot hỗ trợ từ Backend
-      const res = await axios.post('/api/events/chat', { userQuery: userMessage });
+      const res = await axios.post('/api/ai/chatbot', { userQuery: userMessage });
       const botReply = res.data.reply || res.data.message || "Xin lỗi, tôi chưa hiểu rõ câu hỏi của bạn.";
       setMessages(prev => [...prev, { sender: 'bot', text: botReply }]);
     } catch (err) {
-      setMessages(prev => [...prev, { sender: 'bot', text: "Hệ thống AI đang bận, vui lòng thử lại sau giây lát!" }], err);
+      console.error('Không thể gọi trợ lý AI:', err);
+      setMessages(prev => [...prev, {
+        sender: 'bot',
+        text: err.response?.data?.message || 'Hệ thống AI đang bận, vui lòng thử lại sau giây lát!'
+      }]);
     } finally {
       setLoading(false);
     }
