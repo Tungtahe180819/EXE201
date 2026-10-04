@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -9,7 +9,10 @@ export default function Cart() {
   const navigate = useNavigate();
   const [paying, setPaying] = useState(false);
   const [bankPayment, setBankPayment] = useState(null);
-  const [activeOrderCode, setActiveOrderCode] = useState(() => new URLSearchParams(window.location.search).get('orderCode'));
+  const [activeOrderCode, setActiveOrderCode] = useState(() => (
+    new URLSearchParams(window.location.search).get('orderCode')
+    || localStorage.getItem('activePaymentOrderCode')
+  ));
   const [completedPayment, setCompletedPayment] = useState(null);
   const [cart, setCart] = useState(() => {
     try {
@@ -24,6 +27,28 @@ export default function Cart() {
     localStorage.setItem('cart', JSON.stringify(nextCart));
   };
 
+  const finishPayment = useCallback(data => {
+    if (data.vipPlan) {
+      const nextRole = data.userRole || 'user_vip';
+      localStorage.setItem('role', nextRole);
+      try {
+        const user = JSON.parse(localStorage.getItem('user')) || {};
+        localStorage.setItem('user', JSON.stringify({ ...user, role: nextRole, vipExpiresAt: data.vipExpiresAt }));
+      } catch {
+        localStorage.setItem('user', JSON.stringify({ role: nextRole, vipExpiresAt: data.vipExpiresAt }));
+      }
+      window.dispatchEvent(new CustomEvent('role-updated', { detail: { role: nextRole } }));
+    }
+    setCompletedPayment(data);
+    setActiveOrderCode(null);
+    localStorage.removeItem('activePaymentOrderCode');
+    localStorage.removeItem('activePaymentStartedAt');
+    localStorage.removeItem('cart');
+    setCart([]);
+    window.history.replaceState({}, '', '/cart');
+    toast.success(data.vipPlan ? 'Thanh toán thành công! Gói VIP đã được kích hoạt.' : data.emailSent ? 'Thanh toán thành công! Vé đã được gửi qua email.' : 'Thanh toán thành công! Bạn có thể xem vé trong mục Vé của tôi.');
+  }, []);
+
   useEffect(() => {
     if (!activeOrderCode) return undefined;
     const token = localStorage.getItem('token');
@@ -36,21 +61,12 @@ export default function Cart() {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!stopped && data.status === 'Paid') {
-          if (data.vipPlan) {
-            localStorage.setItem('role', 'user_vip');
-            try {
-              const user = JSON.parse(localStorage.getItem('user')) || {};
-              localStorage.setItem('user', JSON.stringify({ ...user, role: 'user_vip', vipExpiresAt: data.vipExpiresAt }));
-            } catch {
-              localStorage.setItem('user', JSON.stringify({ role: 'user_vip', vipExpiresAt: data.vipExpiresAt }));
-            }
-            window.dispatchEvent(new CustomEvent('role-updated', { detail: { role: 'user_vip' } }));
-          }
-          setCompletedPayment(data);
+          finishPayment(data);
+        } else if (!stopped && ['Failed', 'Cancelled'].includes(data.status)) {
           setActiveOrderCode(null);
-          localStorage.removeItem('cart');
-          setCart([]);
-          toast.success(data.vipPlan ? 'Thanh toán thành công! Gói VIP đã được kích hoạt.' : data.emailSent ? 'Thanh toán thành công! Vé đã được gửi qua email.' : 'Thanh toán thành công! Bạn có thể xem vé trong mục Vé của tôi.');
+          localStorage.removeItem('activePaymentOrderCode');
+          localStorage.removeItem('activePaymentStartedAt');
+          toast.error('Giao dịch đã bị hủy hoặc không thành công. Giỏ hàng vẫn được giữ lại.');
         }
       } catch (error) {
         if (error.response?.status !== 404) console.error('Không thể kiểm tra thanh toán:', error);
@@ -63,7 +79,30 @@ export default function Cart() {
       stopped = true;
       window.clearInterval(intervalId);
     };
-  }, [activeOrderCode]);
+  }, [activeOrderCode, finishPayment]);
+
+  useEffect(() => {
+    const hasVipPlan = cart.some(item => item._id === VIP_PLAN_ID || item.itemType === 'vip');
+    if (activeOrderCode || completedPayment || !hasVipPlan) return undefined;
+    const token = localStorage.getItem('token');
+    if (!token) return undefined;
+    let stopped = false;
+
+    axios.get('/api/payments/status/latest-vip', {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(({ data }) => {
+      if (stopped) return;
+      if (data.status === 'Paid') finishPayment(data);
+      else if (['Pending', 'Processing'].includes(data.status)) {
+        localStorage.setItem('activePaymentOrderCode', data.orderCode);
+        setActiveOrderCode(data.orderCode);
+      }
+    }).catch(error => {
+      if (error.response?.status !== 404) console.error('Không thể khôi phục giao dịch VIP:', error);
+    });
+
+    return () => { stopped = true; };
+  }, [activeOrderCode, cart, completedPayment, finishPayment]);
 
   const updateQuantity = (item, delta) => {
     if (item.itemType === 'vip') return;
@@ -107,6 +146,8 @@ export default function Cart() {
       if (data.qrDataURL) {
         setBankPayment(data);
         setActiveOrderCode(data.orderCode);
+        localStorage.setItem('activePaymentOrderCode', data.orderCode);
+        localStorage.setItem('activePaymentStartedAt', new Date().toISOString());
         window.history.replaceState({}, '', `/cart?orderCode=${encodeURIComponent(data.orderCode)}`);
         toast.success('Đã tạo mã VietQR payOS.');
         return;
