@@ -44,43 +44,6 @@ export default function EventDetail() {
     return () => socket.off('ticket_updated');
   }, [id]);
 
-  const handleDownloadICS = () => {
-    try {
-      const title = event.name || event.title || 'Sự kiện Eventverse';
-      const description = event.description || '';
-      const location = typeof event.location === 'object' ? `${event.location.address || ''}, ${event.location.city || ''}` : (event.location || 'Hà Nội');
-      
-      const startTime = event.startTime || event.startDate ? new Date(event.startTime || event.startDate).toISOString().replace(/-|:|\.\d+/g, '') : new Date().toISOString().replace(/-|:|\.\d+/g, '');
-      const endTime = event.endTime ? new Date(event.endTime).toISOString().replace(/-|:|\.\d+/g, '') : startTime;
-
-      const icsContent = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'BEGIN:VEVENT',
-        `SUMMARY:${title}`,
-        `DESCRIPTION:${description}`,
-        `LOCATION:${location}`,
-        `DTSTART:${startTime}`,
-        `DTEND:${endTime}`,
-        'END:VEVENT',
-        'END:VCALENDAR'
-      ].join('\r\n');
-
-      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${title.replace(/\s+/g, '_')}-schedule.ics`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      toast.success("Đã tải file lịch .ics thành công!");
-    } catch (error) {
-      toast.error("Lỗi khi tạo file lịch .ics");
-      console.error(error);
-    }
-  };
-
   const calendarDates = () => {
     const format = value => new Date(value).toISOString().replace(/[-:]|\.\d{3}/g, '');
     return `${format(event.startDate)}/${format(event.endDate || event.startDate)}`;
@@ -225,12 +188,6 @@ export default function EventDetail() {
       </div>
 
       <div className="mb-8 flex flex-wrap gap-3">
-        <button
-          onClick={handleDownloadICS}
-          className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-md transition"
-        >
-          📥 Tải lịch .ics
-        </button>
         <button onClick={openGoogleCalendar} className="px-5 py-3 bg-blue-600 text-white font-bold rounded-2xl">Google Calendar</button>
         <button onClick={openOutlookCalendar} className="px-5 py-3 bg-sky-700 text-white font-bold rounded-2xl">Outlook Calendar</button>
       </div>
