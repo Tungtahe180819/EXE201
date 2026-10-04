@@ -60,7 +60,8 @@ router.post('/free', verifyToken, async (req, res) => {
       rawItems: items,
       io: req.io,
       paymentMethod: 'local',
-      paymentReference: `FREE-${createOrderCode()}`
+      paymentReference: `FREE-${createOrderCode()}`,
+      waitForEmail: false
     });
 
     return res.status(201).json({

@@ -31,7 +31,10 @@ export default function MyTickets() {
                 <p className="text-sm text-slate-500">Mã vé: {ticket.ticketCode}</p>
                 <p className="text-sm text-slate-500">Ngày mua: {new Date(ticket.paidAt || ticket.createdAt).toLocaleDateString('vi-VN')}</p>
               </div>
-              <div className="text-right"><span className="block font-bold text-blue-600">x{ticket.quantity} vé</span><span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">Đã thanh toán</span></div>
+              <div className="text-right">
+                <span className="block font-bold text-blue-600">x{ticket.quantity} vé</span>
+                <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">{Number(ticket.totalPrice || 0) === 0 ? 'Miễn phí' : 'Đã thanh toán'}</span>
+              </div>
             </button>
           ))}
         </div>

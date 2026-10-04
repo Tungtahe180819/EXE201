@@ -80,10 +80,10 @@ export default function Cart() {
         const { data } = await axios.post('/api/payments/free', { items }, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setCompletedPayment(data);
         localStorage.removeItem('cart');
         setCart([]);
         toast.success(data.message);
+        navigate('/my-tickets', { replace: true });
         return;
       }
       const { data } = await axios.post('/api/payments/create', { items, provider: 'payos' }, {

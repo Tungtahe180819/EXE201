@@ -38,7 +38,7 @@ async function quoteOrder(rawItems) {
   return { items, amount };
 }
 
-async function fulfillOrder({ userId, rawItems, io, paymentMethod = 'local', paymentReference = '' }) {
+async function fulfillOrder({ userId, rawItems, io, paymentMethod = 'local', paymentReference = '', waitForEmail = true }) {
   const items = normalizeItems(rawItems);
   const user = await User.findOne({ _id: userId, status: 'Active' }).select('name email');
   if (!user) throw new Error('Tài khoản không tồn tại hoặc đã bị khóa.');
@@ -76,18 +76,30 @@ async function fulfillOrder({ userId, rawItems, io, paymentMethod = 'local', pay
         : `Thanh toán thành công ${createdTickets.length} mã vé. Tổng tiền: ${total.toLocaleString('vi-VN')}₫.`
     });
 
-    let emailSent = false;
-    let emailMessage = 'Thanh toán thành công nhưng chưa gửi được email. Bạn vẫn có thể xem vé trong mục Vé của tôi.';
-    try {
-      await sendTicketConfirmation({ user, tickets: populatedTickets });
-      emailSent = true;
-      emailMessage = `Mã vé đã được gửi tới ${user.email}.`;
-      await Ticket.updateMany({ _id: { $in: createdTickets.map(ticket => ticket._id) } }, { $set: { emailDeliveryStatus: 'Sent', emailSentAt: new Date() } });
-    } catch (emailError) {
-      console.error('Không thể gửi email vé:', emailError.message);
-      await Ticket.updateMany({ _id: { $in: createdTickets.map(ticket => ticket._id) } }, { $set: { emailDeliveryStatus: 'Failed' } });
+    const deliverEmail = async () => {
+      try {
+        await sendTicketConfirmation({ user, tickets: populatedTickets });
+        await Ticket.updateMany({ _id: { $in: createdTickets.map(ticket => ticket._id) } }, { $set: { emailDeliveryStatus: 'Sent', emailSentAt: new Date() } });
+        return { emailSent: true, emailMessage: `Mã vé đã được gửi tới ${user.email}.` };
+      } catch (emailError) {
+        console.error('Không thể gửi email vé:', emailError.message);
+        await Ticket.updateMany({ _id: { $in: createdTickets.map(ticket => ticket._id) } }, { $set: { emailDeliveryStatus: 'Failed' } });
+        return { emailSent: false, emailMessage: 'Vé đã được phát hành nhưng chưa gửi được email. Bạn vẫn có thể xem vé trong mục Vé của tôi.' };
+      }
+    };
+
+    if (!waitForEmail) {
+      void deliverEmail().catch(error => console.error('Không thể cập nhật trạng thái gửi email vé:', error.message));
+      return {
+        tickets: populatedTickets,
+        emailSent: false,
+        email: user.email,
+        emailMessage: `Vé đã được phát hành. Email đang được gửi tới ${user.email}.`
+      };
     }
-    return { tickets: populatedTickets, emailSent, email: user.email, emailMessage };
+
+    const emailResult = await deliverEmail();
+    return { tickets: populatedTickets, email: user.email, ...emailResult };
   } catch (error) {
     if (createdTickets.length) await Ticket.deleteMany({ _id: { $in: createdTickets.map(ticket => ticket._id) } });
     for (const reservation of reservations) await Event.findByIdAndUpdate(reservation.eventId, { $inc: { bookedSlots: -reservation.quantity } });
