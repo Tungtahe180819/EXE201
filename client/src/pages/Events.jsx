@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { formatEventPrice } from '../utils/formatPrice';
 import FilterSection from '../components/FilterSection';
 
 export default function Events() {
@@ -55,7 +56,7 @@ export default function Events() {
                 <h3 className="text-xl font-bold mt-3 mb-2 line-clamp-1">{event.title}</h3>
                 <p className="text-slate-500 text-sm line-clamp-2 mb-4">{event.description}</p>
                 <div className="flex justify-between items-center font-bold">
-                  <span className="text-indigo-600">{event.price ? `${event.price.toLocaleString()}đ` : 'Miễn phí'}</span>
+                  <span className="text-indigo-600">{formatEventPrice(event.price)}</span>
                   <span className="text-xs text-slate-400">Xem chi tiết &rarr;</span>
                 </div>
               </div>

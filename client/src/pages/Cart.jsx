@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { formatEventPrice } from '../utils/formatPrice';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -122,7 +123,7 @@ export default function Cart() {
           <div key={item._id} className="flex flex-col gap-4 rounded-2xl border bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-lg font-bold">{item.title}</h2>
-              <p className="text-sm text-slate-500">{Number(item.price || 0).toLocaleString('vi-VN')}₫ / vé</p>
+              <p className="text-sm text-slate-500">{formatEventPrice(item.price)} / vé</p>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => updateQuantity(item, -1)} className="h-9 w-9 rounded-lg border font-bold">−</button>
@@ -130,13 +131,13 @@ export default function Cart() {
               <button onClick={() => updateQuantity(item, 1)} className="h-9 w-9 rounded-lg border font-bold">+</button>
               <button onClick={() => removeItem(item._id)} className="ml-2 font-bold text-red-500">Xóa</button>
             </div>
-            <p className="text-lg font-black text-indigo-600">{((Number(item.price) || 0) * item.quantity).toLocaleString('vi-VN')}₫</p>
+            <p className="text-lg font-black text-indigo-600">{formatEventPrice((Number(item.price) || 0) * item.quantity)}</p>
           </div>
         ))}
       </div>
 
       <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-indigo-600 p-6 text-white shadow-xl sm:flex-row">
-        <div><p className="text-sm text-indigo-200">Tổng thanh toán</p><p className="text-3xl font-black">{totalPrice.toLocaleString('vi-VN')}₫</p></div>
+        <div><p className="text-sm text-indigo-200">Tổng thanh toán</p><p className="text-3xl font-black">{formatEventPrice(totalPrice)}</p></div>
         <button disabled={paying} onClick={handleCheckout} className="rounded-xl bg-white px-8 py-3 font-bold text-indigo-600 disabled:opacity-60">
           {paying ? 'Đang tạo mã...' : bankPayment ? 'Tạo lại mã VietQR' : 'Thanh toán VietQR qua payOS'}
         </button>
@@ -158,7 +159,7 @@ export default function Cart() {
             <p><strong>Ngân hàng:</strong> VietQR / payOS</p>
             <p><strong>Số tài khoản:</strong> {bankPayment.bankInfo?.accountNo}</p>
             <p><strong>Chủ tài khoản:</strong> {bankPayment.bankInfo?.accountName}</p>
-            <p><strong>Số tiền:</strong> {Number(bankPayment.amount || totalPrice).toLocaleString('vi-VN')}₫</p>
+            <p><strong>Số tiền:</strong> {formatEventPrice(bankPayment.amount || totalPrice)}</p>
             <p><strong>Nội dung:</strong> {bankPayment.description}</p>
           </div>
           {bankPayment.checkoutUrl && (

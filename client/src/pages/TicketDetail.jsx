@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { formatEventPrice } from '../utils/formatPrice';
 import toast from 'react-hot-toast';
 import { TicketQRCard } from '../components/TicketQRCard';
 
@@ -29,7 +30,7 @@ export default function TicketDetail() {
       <div className="mb-8 space-y-3">
         <p><strong>Ngày mua:</strong> {new Date(ticket.paidAt || ticket.createdAt).toLocaleString('vi-VN')}</p>
         <p><strong>Số lượng:</strong> {ticket.quantity} vé</p>
-        <p><strong>Tổng tiền:</strong> {Number(ticket.totalPrice).toLocaleString('vi-VN')}₫</p>
+        <p><strong>Tổng tiền:</strong> {formatEventPrice(ticket.totalPrice)}</p>
         <p><strong>Trạng thái:</strong> <span className="font-bold text-green-600">Đã thanh toán</span></p>
       </div>
       <TicketQRCard ticket={{ ...ticket, eventName: ticket.eventId?.title, eventId: ticket.eventId?._id }} />

@@ -4,6 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import io from 'socket.io-client';
 import EventReviewSection from '../components/EventReviewSection';
+import { formatEventPrice } from '../utils/formatPrice';
 
 const socket = io(import.meta.env.VITE_SOCKET_URL || window.location.origin);
 
@@ -267,7 +268,7 @@ export default function EventDetail() {
           onClick={handleAddToCart}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-bold shadow-lg transition mb-8"
         >
-          Thêm vào giỏ hàng - {((event.price || 0) * quantity).toLocaleString()}đ
+          Thêm vào giỏ hàng - {formatEventPrice((Number(event.price) || 0) * quantity)}
         </button>
       )}
 

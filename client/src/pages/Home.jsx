@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AIPlannerModal from '../components/AIPlannerModal';
 import FilterSection from '../components/FilterSection';
+import { formatEventPrice, isFreePrice } from '../utils/formatPrice';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80';
 
@@ -91,7 +92,7 @@ export default function Home() {
                     </p>
                     <div className="flex items-center gap-4 text-sm text-indigo-300 mb-6 font-medium">
                       <span>📍 {ev.location?.address || 'Hà Nội'}</span>
-                      <span>🎟️ Giá vé độc quyền</span>
+                      <span>🎟️ {formatEventPrice(ev.price)}</span>
                     </div>
                     <div className="flex gap-4">
                       <button 
@@ -178,6 +179,9 @@ export default function Home() {
                     <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-3 mb-4">
                       {ev.description}
                     </p>
+                    <span className={`inline-flex rounded-full px-3 py-1 text-sm font-black ${isFreePrice(ev.price) ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'}`}>
+                      🎟️ {formatEventPrice(ev.price)}
+                    </span>
                   </div>
                   <div>
                     <div className="text-xs text-indigo-500 font-semibold mb-4">📍 {ev.location?.address || 'Hà Nội'}</div>
