@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -6,8 +6,9 @@ import toast from 'react-hot-toast';
 export default function Cart() {
   const navigate = useNavigate();
   const [paying, setPaying] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('local');
   const [bankPayment, setBankPayment] = useState(null);
+  const [activeOrderCode, setActiveOrderCode] = useState(() => new URLSearchParams(window.location.search).get('orderCode'));
+  const [completedPayment, setCompletedPayment] = useState(null);
   const [cart, setCart] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('cart')) || [];
@@ -20,6 +21,37 @@ export default function Cart() {
     setCart(nextCart);
     localStorage.setItem('cart', JSON.stringify(nextCart));
   };
+
+  useEffect(() => {
+    if (!activeOrderCode) return undefined;
+    const token = localStorage.getItem('token');
+    if (!token) return undefined;
+    let stopped = false;
+
+    const checkPayment = async () => {
+      try {
+        const { data } = await axios.get(`/api/payments/status/${activeOrderCode}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!stopped && data.status === 'Paid') {
+          setCompletedPayment(data);
+          setActiveOrderCode(null);
+          localStorage.removeItem('cart');
+          setCart([]);
+          toast.success(data.emailSent ? 'Thanh toán thành công! Vé đã được gửi qua email.' : 'Thanh toán thành công! Bạn có thể xem vé trong mục Vé của tôi.');
+        }
+      } catch (error) {
+        if (error.response?.status !== 404) console.error('Không thể kiểm tra thanh toán:', error);
+      }
+    };
+
+    checkPayment();
+    const intervalId = window.setInterval(checkPayment, 3000);
+    return () => {
+      stopped = true;
+      window.clearInterval(intervalId);
+    };
+  }, [activeOrderCode]);
 
   const updateQuantity = (item, delta) => {
     const available = Math.max(1, (item.totalSlots || 100) - (item.bookedSlots || 0));
@@ -43,26 +75,17 @@ export default function Cart() {
     try {
       setPaying(true);
       const items = cart.map(item => ({ eventId: item._id, quantity: item.quantity, ticketType: item.category }));
-      const endpoint = paymentMethod === 'local' ? '/api/tickets/checkout' : '/api/payments/create';
-      const { data } = await axios.post(endpoint, {
-        items,
-        ...(paymentMethod !== 'local' ? { provider: paymentMethod } : {})
-      }, {
+      const { data } = await axios.post('/api/payments/create', { items, provider: 'payos' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (data.paymentUrl) {
-        window.location.assign(data.paymentUrl);
-        return;
-      }
       if (data.qrDataURL) {
         setBankPayment(data);
-        toast.success('Đã tạo mã QR chuyển khoản ngân hàng.');
+        setActiveOrderCode(data.orderCode);
+        window.history.replaceState({}, '', `/cart?orderCode=${encodeURIComponent(data.orderCode)}`);
+        toast.success('Đã tạo mã VietQR payOS.');
         return;
       }
-      localStorage.removeItem('cart');
-      setCart([]);
-      toast.success(data.message || 'Thanh toán thành công!');
-      navigate('/my-tickets');
+      throw new Error('Máy chủ không trả về mã VietQR.');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Thanh toán thất bại, vui lòng thử lại.');
     } finally {
@@ -71,6 +94,18 @@ export default function Cart() {
   };
 
   const totalPrice = cart.reduce((sum, item) => sum + (Number(item.price) || 0) * item.quantity, 0);
+
+  if (completedPayment) return (
+    <div className="mx-auto max-w-2xl p-10 text-center">
+      <div className="rounded-3xl border border-emerald-300 bg-emerald-50 p-10 text-slate-900 shadow-xl">
+        <div className="mb-4 text-6xl">✅</div>
+        <h1 className="text-3xl font-black text-emerald-700">Thanh toán thành công</h1>
+        <p className="mt-3">{completedPayment.emailSent ? 'Vé và mã vé đã được gửi tới email đăng ký của bạn.' : completedPayment.emailMessage || 'Vé đã được phát hành. Bạn có thể xem vé trong mục Vé của tôi.'}</p>
+        <p className="mt-2 text-sm text-slate-500">Mã đơn: {completedPayment.orderCode}</p>
+        <Link to="/my-tickets" className="mt-6 inline-block rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white">Xem vé của tôi</Link>
+      </div>
+    </div>
+  );
 
   if (cart.length === 0) return (
     <div className="p-20 text-center">
@@ -103,33 +138,35 @@ export default function Cart() {
       <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-indigo-600 p-6 text-white shadow-xl sm:flex-row">
         <div><p className="text-sm text-indigo-200">Tổng thanh toán</p><p className="text-3xl font-black">{totalPrice.toLocaleString('vi-VN')}₫</p></div>
         <button disabled={paying} onClick={handleCheckout} className="rounded-xl bg-white px-8 py-3 font-bold text-indigo-600 disabled:opacity-60">
-          {paying ? 'Đang xử lý...' : 'Xác nhận thanh toán'}
+          {paying ? 'Đang tạo mã...' : bankPayment ? 'Tạo lại mã VietQR' : 'Thanh toán VietQR qua payOS'}
         </button>
       </div>
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <h2 className="mb-4 text-lg font-black">Phương thức thanh toán</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            ['local', '🧪 Thanh toán thử'],
-            ['momo', '💗 Ví MoMo'],
-            ['vnpay', '💳 VNPAY'],
-            ['bank', '🏦 Chuyển khoản QR']
-          ].map(([value, label]) => (
-            <label key={value} className={`cursor-pointer rounded-xl border p-4 font-bold transition ${paymentMethod === value ? 'border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950' : 'border-slate-200 dark:border-slate-700'}`}>
-              <input type="radio" name="paymentMethod" value={value} checked={paymentMethod === value} onChange={() => { setPaymentMethod(value); setBankPayment(null); }} className="mr-2" />
-              {label}
-            </label>
-          ))}
+        <div className="rounded-xl border border-indigo-600 bg-indigo-50 p-4 font-bold text-indigo-700 dark:bg-indigo-950">
+          ✅ VietQR • Xác nhận tự động bởi payOS
         </div>
-        <p className="mt-4 text-xs text-slate-500">MoMo và VNPAY dùng môi trường sandbox. Chuyển khoản ngân hàng tạo mã VietQR và cần đối soát trước khi phát hành vé.</p>
+        <p className="mt-4 text-xs text-slate-500">Quét mã bằng ứng dụng ngân hàng và giữ nguyên số tiền, nội dung chuyển khoản. Vé sẽ được phát hành tự động khi payOS xác nhận giao dịch.</p>
       </div>
 
       {bankPayment && (
         <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center text-slate-900">
           <h2 className="text-xl font-black">Quét mã để chuyển khoản</h2>
           <img src={bankPayment.qrDataURL} alt="Mã VietQR thanh toán" className="mx-auto my-4 max-h-[520px] rounded-xl" />
-          <p className="font-bold">Nội dung: {bankPayment.description}</p>
+          <div className="mx-auto max-w-lg space-y-1 rounded-xl bg-white p-4 text-left shadow-sm">
+            <p><strong>Ngân hàng:</strong> VietQR / payOS</p>
+            <p><strong>Số tài khoản:</strong> {bankPayment.bankInfo?.accountNo}</p>
+            <p><strong>Chủ tài khoản:</strong> {bankPayment.bankInfo?.accountName}</p>
+            <p><strong>Số tiền:</strong> {Number(bankPayment.amount || totalPrice).toLocaleString('vi-VN')}₫</p>
+            <p><strong>Nội dung:</strong> {bankPayment.description}</p>
+          </div>
+          {bankPayment.checkoutUrl && (
+            <a href={bankPayment.checkoutUrl} target="_blank" rel="noreferrer" className="mt-4 inline-block rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white">
+              Mở trang thanh toán payOS
+            </a>
+          )}
+          <p className="mt-3 animate-pulse font-semibold text-amber-700">Đang chờ ngân hàng xác nhận giao dịch...</p>
           <p className="mt-2 text-sm text-slate-600">{bankPayment.message}</p>
         </div>
       )}

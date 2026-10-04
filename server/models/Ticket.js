@@ -10,7 +10,7 @@ const ticketSchema = new mongoose.Schema({
   status: { type: String, enum: ['Pending', 'Confirmed', 'Cancelled'], default: 'Confirmed' },
   paymentStatus: { type: String, enum: ['Pending', 'Paid', 'Refunded'], default: 'Pending' },
   paidAt: { type: Date },
-  paymentMethod: { type: String, enum: ['local', 'momo', 'vnpay', 'bank'], default: 'local' },
+  paymentMethod: { type: String, enum: ['local', 'bank'], default: 'local' },
   paymentReference: { type: String, default: '' },
   emailDeliveryStatus: { type: String, enum: ['Pending', 'Sent', 'Failed'], default: 'Pending' },
   emailSentAt: { type: Date },

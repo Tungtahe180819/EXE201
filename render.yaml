@@ -21,7 +21,9 @@ services:
         value: https://exe-201-fpt7.vercel.app
       - key: SERVER_PUBLIC_URL
         value: https://eventverse-api.onrender.com
-      - key: MOMO_ENDPOINT
-        value: https://test-payment.momo.vn/v2/gateway/api/create
-      - key: VNPAY_ENDPOINT
-        value: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+      - key: PAYOS_CLIENT_ID
+        sync: false
+      - key: PAYOS_API_KEY
+        sync: false
+      - key: PAYOS_CHECKSUM_KEY
+        sync: false

@@ -9,9 +9,12 @@ const paymentSchema = new mongoose.Schema({
     ticketType: { type: String, default: 'Standard' }
   }],
   amount: { type: Number, required: true, min: 0 },
-  provider: { type: String, enum: ['momo', 'vnpay', 'bank'], required: true },
-  status: { type: String, enum: ['Pending', 'Processing', 'Paid', 'Failed'], default: 'Pending', index: true },
+  provider: { type: String, enum: ['payos'], required: true },
+  status: { type: String, enum: ['Pending', 'Processing', 'Paid', 'Failed', 'Cancelled'], default: 'Pending', index: true },
   transactionId: { type: String, default: '' },
+  paidAt: { type: Date },
+  emailSent: { type: Boolean, default: false },
+  emailMessage: { type: String, default: '' },
   tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' }],
   providerResponse: { type: mongoose.Schema.Types.Mixed }
 }, { timestamps: true });

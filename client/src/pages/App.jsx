@@ -25,7 +25,6 @@ import EditEvent from './EditEvent';
 import EventCalendar from './EventCalendar';
 import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
-import PaymentResult from './PaymentResult';
 import ContactSurveyModal from '../components/ContactSurveyModal';
 import { LanguageContext } from '../context/LanguageContext';
 
@@ -64,7 +63,6 @@ function App() {
             <Route path="/register" element={<Auth key="register" setRole={setRole} />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/payment-result" element={<PaymentResult />} />
             <Route path="/feedback" element={<ContactSurveyModal />} />
 
             <Route path="/events" element={<Events />} />
