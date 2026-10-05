@@ -75,7 +75,7 @@ export default function ChatBox({ role }) {
           <div className="flex-1 p-4 overflow-y-auto space-y-3 text-sm">
             {messages.map((msg, index) => (
               <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] p-3 rounded-2xl ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none'}`}>
+                <div className={`max-w-[85%] whitespace-pre-line p-3 rounded-2xl leading-relaxed ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none'}`}>
                   {msg.text}
                 </div>
               </div>
