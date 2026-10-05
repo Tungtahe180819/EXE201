@@ -84,7 +84,37 @@ const findRelevantEvents = async filters => {
   }).slice(0, 5);
 };
 
-const localEventReply = (events, filters) => {
+const findMatchingPastEvents = async filters => {
+  const candidates = await Event.find({ startDate: { $lt: new Date() } })
+    .sort({ startDate: -1 })
+    .limit(500)
+    .lean();
+
+  return candidates.filter(event => {
+    if (filters.category && normalizeText(event.category) !== normalizeText(filters.category)) return false;
+    if (filters.city && !normalizeText(`${event.location?.city || ''} ${event.location?.address || ''}`).includes(normalizeText(filters.city))) return false;
+    if (filters.wantsFree && Number(event.price || 0) !== 0) return false;
+    if (filters.budget && Number(event.price || 0) >= filters.budget.amount) return false;
+    return true;
+  }).slice(0, 3);
+};
+
+const formatEventLine = (event, index) => {
+  const date = event.startDate
+    ? new Date(event.startDate).toLocaleString('vi-VN', {
+      timeZone: event.timezone || 'Asia/Ho_Chi_Minh',
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    })
+    : 'đang cập nhật';
+  return `${index + 1}. ${event.title}\n   Giá vé: ${formatPrice(event.price)}\n   Thời gian: ${date}\n   Địa điểm: ${event.location?.address || event.location?.city || 'đang cập nhật địa điểm'}`;
+};
+
+const localEventReply = (events, pastEvents, filters) => {
+  if (!events.length && pastEvents.length) {
+    const pastList = pastEvents.map(formatEventLine).join('\n\n');
+    return `Bạn nói đúng: Eventverse có sự kiện khớp điều kiện giá${filters.category ? ` và thể loại ${filters.category}` : ''}${filters.city ? ` tại ${filters.city}` : ''}. Tuy nhiên, các sự kiện này đã qua ngày tổ chức nên không còn đặt vé được.\n\n${pastList}\n\nHiện chưa có sự kiện sắp diễn ra phù hợp. Danh sách sự kiện trên trang hiện vẫn gồm cả sự kiện đã qua.`;
+  }
+
   if (!events.length) {
     const criteria = [
       filters.category && `thể loại ${filters.category}`,
@@ -93,18 +123,10 @@ const localEventReply = (events, filters) => {
       filters.wantsFree && 'sự kiện miễn phí'
     ].filter(Boolean);
     const criterionText = criteria.length ? ` theo tiêu chí ${criteria.join(', ')}` : '';
-    return `Hiện Eventverse chưa có sự kiện sắp diễn ra còn vé${criterionText}. Bạn thử nới điều kiện giá, địa điểm hoặc thể loại nhé.`;
+    return `Hiện Eventverse chưa có sự kiện sắp diễn ra còn vé${criterionText}.`;
   }
 
-  const recommendations = events.map((event, index) => {
-    const date = event.startDate
-      ? new Date(event.startDate).toLocaleString('vi-VN', {
-        timeZone: event.timezone || 'Asia/Ho_Chi_Minh',
-        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-      })
-      : 'đang cập nhật';
-    return `${index + 1}. ${event.title}\n   Giá vé: ${formatPrice(event.price)}\n   Thời gian: ${date}\n   Địa điểm: ${event.location?.address || event.location?.city || 'đang cập nhật địa điểm'}`;
-  });
+  const recommendations = events.map(formatEventLine);
   return `Tôi đã lọc các sự kiện sắp diễn ra còn vé trong Eventverse${filters.budget ? ` với giá dưới ${formatPrice(filters.budget.amount)}` : ''}${filters.category ? ` thuộc thể loại ${filters.category}` : ''}${filters.city ? ` tại ${filters.city}` : ''}${filters.wantsFree ? ' miễn phí' : ''}:\n\n${recommendations.join('\n\n')}`;
 };
 
@@ -183,6 +205,7 @@ const chatbotSupport = async (req, res) => {
   if (filters.asksForEvents) {
     try {
       const events = await findRelevantEvents(filters);
+      const pastEvents = events.length ? [] : await findMatchingPastEvents(filters);
       return res.status(200).json({
         success: true,
         source: 'eventverse_database',
@@ -192,7 +215,7 @@ const chatbotSupport = async (req, res) => {
           maxPrice: filters.budget?.amount ?? null,
           freeOnly: filters.wantsFree
         },
-        reply: localEventReply(events, filters)
+        reply: localEventReply(events, pastEvents, filters)
       });
     } catch (error) {
       console.error('Không thể tìm sự kiện cho chatbot:', error.message);
