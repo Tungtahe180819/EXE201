@@ -42,8 +42,12 @@ export default function Navbar({ role, setRole, theme, toggleTheme, organizerAct
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
         
         {/* Logo hệ thống */}
-        <Link to="/" className="text-2xl font-black bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent">
-          Eventverse 🌐
+        <Link to="/" aria-label="Eventverse - Trang chủ" className="shrink-0">
+          <img
+            src="/eventverse-logo.png"
+            alt="Eventverse"
+            className="h-14 w-40 rounded-md object-cover object-center"
+          />
         </Link>
 
         {/* Thanh tìm kiếm toàn hệ thống (Global Search Engine) ở vị trí trung tâm */}
