@@ -4,6 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { formatEventPrice } from '../utils/formatPrice';
 import { VIP_PLAN_ID } from '../utils/vipPlan';
+import { ORGANIZER_PLAN_ID } from '../utils/organizerPlan';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -39,6 +40,14 @@ export default function Cart() {
       }
       window.dispatchEvent(new CustomEvent('role-updated', { detail: { role: nextRole } }));
     }
+    if (data.organizerPlan && data.organizerExpiresAt) {
+      localStorage.setItem('organizerExpiresAt', data.organizerExpiresAt);
+      try {
+        const user = JSON.parse(localStorage.getItem('user')) || {};
+        localStorage.setItem('user', JSON.stringify({ ...user, organizerExpiresAt: data.organizerExpiresAt }));
+      } catch { localStorage.setItem('user', JSON.stringify({ organizerExpiresAt: data.organizerExpiresAt })); }
+      window.dispatchEvent(new CustomEvent('organizer-updated', { detail: { organizerExpiresAt: data.organizerExpiresAt } }));
+    }
     setCompletedPayment(data);
     setActiveOrderCode(null);
     localStorage.removeItem('activePaymentOrderCode');
@@ -46,7 +55,7 @@ export default function Cart() {
     localStorage.removeItem('cart');
     setCart([]);
     window.history.replaceState({}, '', '/cart');
-    toast.success(data.vipPlan ? 'Thanh toán thành công! Gói VIP đã được kích hoạt.' : data.emailSent ? 'Thanh toán thành công! Vé đã được gửi qua email.' : 'Thanh toán thành công! Bạn có thể xem vé trong mục Vé của tôi.');
+    toast.success(data.organizerPlan ? 'Thanh toán thành công! Gói Ban tổ chức đã được kích hoạt.' : data.vipPlan ? 'Thanh toán thành công! Gói VIP đã được kích hoạt.' : data.emailSent ? 'Thanh toán thành công! Vé đã được gửi qua email.' : 'Thanh toán thành công! Bạn có thể xem vé trong mục Vé của tôi.');
   }, []);
 
   useEffect(() => {
@@ -83,12 +92,13 @@ export default function Cart() {
 
   useEffect(() => {
     const hasVipPlan = cart.some(item => item._id === VIP_PLAN_ID || item.itemType === 'vip');
-    if (activeOrderCode || completedPayment || !hasVipPlan) return undefined;
+    const hasOrganizerPlan = cart.some(item => item._id === ORGANIZER_PLAN_ID || item.itemType === 'organizer');
+    if (activeOrderCode || completedPayment || (!hasVipPlan && !hasOrganizerPlan)) return undefined;
     const token = localStorage.getItem('token');
     if (!token) return undefined;
     let stopped = false;
 
-    axios.get('/api/payments/status/latest-vip', {
+    axios.get(hasVipPlan ? '/api/payments/status/latest-vip' : '/api/payments/status/latest-organizer', {
       headers: { Authorization: `Bearer ${token}` }
     }).then(({ data }) => {
       if (stopped) return;
@@ -105,7 +115,7 @@ export default function Cart() {
   }, [activeOrderCode, cart, completedPayment, finishPayment]);
 
   const updateQuantity = (item, delta) => {
-    if (item.itemType === 'vip') return;
+    if (['vip', 'organizer'].includes(item.itemType)) return;
     const available = Math.max(1, (item.totalSlots || 100) - (item.bookedSlots || 0));
     const nextQuantity = Math.min(20, available, Math.max(1, item.quantity + delta));
     saveCart(cart.map(current => current._id === item._id ? { ...current, quantity: nextQuantity } : current));
@@ -127,8 +137,9 @@ export default function Cart() {
     try {
       setPaying(true);
       const hasVipPlan = cart.some(item => item._id === VIP_PLAN_ID || item.itemType === 'vip');
+      const hasOrganizerPlan = cart.some(item => item._id === ORGANIZER_PLAN_ID || item.itemType === 'organizer');
       const items = cart
-        .filter(item => item._id !== VIP_PLAN_ID && item.itemType !== 'vip')
+        .filter(item => ![VIP_PLAN_ID, ORGANIZER_PLAN_ID].includes(item._id) && !['vip', 'organizer'].includes(item.itemType))
         .map(item => ({ eventId: item._id, quantity: item.quantity, ticketType: item.category }));
       if (totalPrice === 0) {
         const { data } = await axios.post('/api/payments/free', { items }, {
@@ -140,7 +151,7 @@ export default function Cart() {
         navigate('/my-tickets', { replace: true });
         return;
       }
-      const { data } = await axios.post('/api/payments/create', { items, vipPlan: hasVipPlan, provider: 'payos' }, {
+      const { data } = await axios.post('/api/payments/create', { items, vipPlan: hasVipPlan, organizerPlan: hasOrganizerPlan, provider: 'payos' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (data.qrDataURL) {
@@ -166,10 +177,10 @@ export default function Cart() {
     <div className="mx-auto max-w-2xl p-10 text-center">
       <div className="rounded-3xl border border-emerald-300 bg-emerald-50 p-10 text-slate-900 shadow-xl">
         <div className="mb-4 text-6xl">✅</div>
-        <h1 className="text-3xl font-black text-emerald-700">{completedPayment.vipPlan ? 'Nâng cấp VIP thành công' : completedPayment.free ? 'Nhận vé miễn phí thành công' : 'Thanh toán thành công'}</h1>
-        <p className="mt-3">{completedPayment.emailSent ? 'Vé và mã vé đã được gửi tới email đăng ký của bạn.' : completedPayment.emailMessage || (completedPayment.vipPlan ? 'Bạn đã có thể sử dụng Lịch thông minh và Chatbot AI.' : 'Vé đã được phát hành. Bạn có thể xem vé trong mục Vé của tôi.')}</p>
+        <h1 className="text-3xl font-black text-emerald-700">{completedPayment.organizerPlan ? 'Đăng ký Ban tổ chức thành công' : completedPayment.vipPlan ? 'Nâng cấp VIP thành công' : completedPayment.free ? 'Nhận vé miễn phí thành công' : 'Thanh toán thành công'}</h1>
+        <p className="mt-3">{completedPayment.emailSent ? 'Vé và mã vé đã được gửi tới email đăng ký của bạn.' : completedPayment.emailMessage || (completedPayment.organizerPlan ? 'Bạn đã có thể tạo và quản lý tối đa 5 sự kiện mỗi tháng.' : completedPayment.vipPlan ? 'Bạn đã có thể sử dụng Lịch thông minh và Chatbot AI.' : 'Vé đã được phát hành. Bạn có thể xem vé trong mục Vé của tôi.')}</p>
         {completedPayment.orderCode && <p className="mt-2 text-sm text-slate-500">Mã đơn: {completedPayment.orderCode}</p>}
-        <Link to={completedPayment.vipPlan ? '/profile' : '/my-tickets'} className="mt-6 inline-block rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white">{completedPayment.vipPlan ? 'Xem hồ sơ VIP' : 'Xem vé của tôi'}</Link>
+        <Link to={completedPayment.organizerPlan ? '/organizer/events' : completedPayment.vipPlan ? '/profile' : '/my-tickets'} className="mt-6 inline-block rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white">{completedPayment.organizerPlan ? 'Quản lý sự kiện' : completedPayment.vipPlan ? 'Xem hồ sơ VIP' : 'Xem vé của tôi'}</Link>
       </div>
     </div>
   );
@@ -189,12 +200,12 @@ export default function Cart() {
           <div key={item._id} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 md:flex-row md:items-center md:justify-between">
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-lg font-bold">{item.title}</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{formatEventPrice(item.price)} {item.itemType === 'vip' ? '/ 1 năm' : '/ vé'}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{formatEventPrice(item.price)} {item.itemType === 'vip' ? '/ 1 năm' : item.itemType === 'organizer' ? '/ 30 ngày' : '/ vé'}</p>
             </div>
             <div className="flex items-center gap-3">
-              {item.itemType !== 'vip' && <button onClick={() => updateQuantity(item, -1)} className="h-9 w-9 rounded-lg border border-slate-200 font-bold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">−</button>}
+              {!['vip', 'organizer'].includes(item.itemType) && <button onClick={() => updateQuantity(item, -1)} className="h-9 w-9 rounded-lg border border-slate-200 font-bold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">−</button>}
               <span className="w-8 text-center font-black">{item.quantity}</span>
-              {item.itemType !== 'vip' && <button onClick={() => updateQuantity(item, 1)} className="h-9 w-9 rounded-lg border border-slate-200 font-bold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">+</button>}
+              {!['vip', 'organizer'].includes(item.itemType) && <button onClick={() => updateQuantity(item, 1)} className="h-9 w-9 rounded-lg border border-slate-200 font-bold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">+</button>}
               <button onClick={() => removeItem(item._id)} className="ml-2 font-bold text-red-500">Xóa</button>
             </div>
             <p className="text-lg font-black text-indigo-600">{formatEventPrice((Number(item.price) || 0) * item.quantity)}</p>

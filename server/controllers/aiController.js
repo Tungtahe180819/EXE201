@@ -109,6 +109,38 @@ const formatEventLine = (event, index) => {
   return `${index + 1}. ${event.title}\n   Giá vé: ${formatPrice(event.price)}\n   Thời gian: ${date}\n   Địa điểm: ${event.location?.address || event.location?.city || 'đang cập nhật địa điểm'}`;
 };
 
+const createDatabaseItinerary = (events, { destinationArea, startDate, endDate, userPreferences }) => ({
+  summary: events.length
+    ? `Lịch trình tại ${destinationArea} từ ${startDate} đến ${endDate}, sắp xếp theo sự kiện đang có trong Eventverse. Sở thích: ${userPreferences}.`
+    : `Hiện chưa có sự kiện phù hợp tại ${destinationArea} từ ${startDate} đến ${endDate}. Hãy thử đổi khu vực hoặc khoảng ngày.`,
+  days: events.map(event => ({
+    date: event.startDate,
+    title: event.title,
+    category: event.category,
+    venue: event.location?.address || event.location?.city || 'Địa điểm đang cập nhật',
+    price: formatPrice(event.price),
+    description: event.description || ''
+  })),
+  source: 'eventverse_database'
+});
+
+const findItineraryEvents = async ({ destinationArea, startDate, endDate }) => {
+  const start = new Date(`${startDate}T00:00:00`);
+  const end = new Date(`${endDate}T23:59:59.999`);
+  const area = normalizeText(destinationArea).trim();
+  const areaTokens = area.split(/\s+/).filter(Boolean);
+  const candidates = await Event.find({ startDate: { $gte: start, $lte: end } })
+    .sort({ startDate: 1 })
+    .limit(500)
+    .lean();
+
+  return candidates.filter(event => {
+    const location = normalizeText(`${event.location?.city || ''} ${event.location?.address || ''}`);
+    const available = Number(event.totalSlots ?? event.stock ?? 100) - Number(event.bookedSlots || 0);
+    return areaTokens.every(token => location.includes(token)) && available > 0;
+  });
+};
+
 const localEventReply = (events, pastEvents, filters) => {
   if (!events.length && pastEvents.length) {
     const pastList = pastEvents.map(formatEventLine).join('\n\n');
@@ -139,45 +171,41 @@ const generateSmartItinerary = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Vui lòng nhập đầy đủ địa điểm, ngày bắt đầu, ngày kết thúc và sở thích.' });
     }
 
-    if (new Date(endDate) < new Date(startDate)) {
+    const start = new Date(`${startDate}T00:00:00`);
+    const end = new Date(`${endDate}T23:59:59.999`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return res.status(400).json({ success: false, message: 'Ngày bắt đầu hoặc ngày kết thúc không hợp lệ.' });
+    }
+    if (end < start) {
       return res.status(400).json({ success: false, message: 'Ngày kết thúc phải sau ngày bắt đầu.' });
     }
 
-    // Lọc sự kiện chính thống trong khu vực
-    const events = await Event.find({ 
-      "location.city": { $regex: destinationArea, $options: 'i' }
-    });
-    
-    const eventContext = JSON.stringify(events.map(e => ({ 
-      title: e.title || e.name, 
-      category: e.category, 
-      date: e.startDate || e.date, 
-      summary: e.description 
-    })));
-
-    const prompt = `
-    Bạn là trợ lý Eventverse. Người dùng muốn đi chơi từ ${startDate} đến ${endDate} tại "${destinationArea}". 
-    Sở thích: "${userPreferences}". 
-    Danh sách sự kiện chính thống: ${eventContext}. 
-    Hãy tạo lịch trình dạng JSON sạch với các ngày và hoạt động chi tiết.
-    `;
-
+    const events = await findItineraryEvents({ destinationArea, startDate, endDate });
+    const fallbackPlan = createDatabaseItinerary(events, { destinationArea, startDate, endDate, userPreferences });
     const ai = getAI();
-    if (!ai) return res.status(503).json({ success: false, message: 'Trợ lý AI chưa được cấu hình Gemini API key.' });
+    let parsedPlan = fallbackPlan;
 
-    const aiResponse = await ai.models.generateContent({ 
-      model: 'gemini-2.5-flash', 
-      contents: prompt 
-    });
-    
-    const responseText = aiResponse.text || "";
+    // Gemini is optional: use only verified Eventverse event data if no key is configured or Gemini fails.
+    if (ai && events.length) {
+      const eventContext = JSON.stringify(events.map(event => ({
+        id: String(event._id),
+        title: event.title,
+        category: event.category,
+        date: event.startDate,
+        summary: event.description,
+        venue: event.location?.address,
+        price: event.price
+      })));
+      const prompt = `Bạn là trợ lý lên lịch của Eventverse. Tạo lịch trình ngắn gọn bằng tiếng Việt cho ${destinationArea}, từ ${startDate} đến ${endDate}. Sở thích: ${userPreferences}. Chỉ sử dụng sự kiện trong JSON bên dưới; không được bịa sự kiện, ngày, địa điểm hoặc giá. Trả về JSON có summary và days.\nDỮ LIỆU SỰ KIỆN: ${eventContext}`;
 
-    let parsedPlan;
-    try {
-      const cleanText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-      parsedPlan = JSON.parse(cleanText);
-    } catch (e) {
-      parsedPlan = { rawText: responseText };
+      try {
+        const aiResponse = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+        const cleanText = (aiResponse.text || '').replace(/```json/gi, '').replace(/```/g, '').trim();
+        const generatedPlan = JSON.parse(cleanText);
+        if (generatedPlan && typeof generatedPlan === 'object') parsedPlan = generatedPlan;
+      } catch (aiError) {
+        console.error('Gemini itinerary failed; using Eventverse data fallback:', aiError.message);
+      }
     }
 
     const newItinerary = new Itinerary({
@@ -190,7 +218,12 @@ const generateSmartItinerary = async (req, res) => {
     });
     await newItinerary.save();
 
-    res.status(201).json({ success: true, message: 'Đã tạo lịch trình thông minh!', data: newItinerary });
+    res.status(201).json({
+      success: true,
+      message: ai ? 'Đã tạo lịch trình thông minh!' : 'Đã tạo lịch trình từ dữ liệu sự kiện Eventverse.',
+      data: newItinerary,
+      plan: parsedPlan
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -120,4 +120,20 @@ async function sendBookingReminder({ booking }) {
   });
 }
 
-module.exports = { sendTicketConfirmation, sendPasswordResetEmail, sendBookingReminder };
+async function sendAttendanceConfirmation({ user, booking }) {
+  const transporter = createTransporter();
+  const event = booking.eventId || {};
+  const confirmationCode = booking.confirmationCode;
+  const qrValue = JSON.stringify({ bookingId: booking._id, confirmationCode });
+  const qrBuffer = await QRCode.toBuffer(qrValue, { type: 'png', width: 360, margin: 2 });
+  const info = await transporter.sendMail({
+    from: process.env.EMAIL_FROM || `Eventverse <${process.env.EMAIL_USER}>`,
+    to: user.email,
+    subject: `Xác nhận tham gia: ${event.title || 'Sự kiện Eventverse'}`,
+    html: `<div style="max-width:620px;margin:auto;font-family:Arial,sans-serif;color:#0f172a"><div style="background:#4f46e5;color:white;padding:24px;border-radius:16px 16px 0 0"><h1 style="margin:0">Eventverse 🎟️</h1><p>Bạn đã xác nhận tham gia</p></div><div style="padding:24px;border:1px solid #e2e8f0"><p>Xin chào <strong>${escapeHtml(user.name || user.email)}</strong>,</p><h2>${escapeHtml(event.title || 'Sự kiện')}</h2><p>Thời gian: ${escapeHtml(event.startDate ? new Date(event.startDate).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }) : 'Đang cập nhật')}</p><p>Địa điểm: ${escapeHtml(event.location?.address || '')}, ${escapeHtml(event.location?.city || '')}</p><p>Mã xác nhận: <strong style="font-family:monospace">${escapeHtml(confirmationCode)}</strong></p><p>Xuất trình mã QR dưới đây tại quầy check-in:</p><p><img src="cid:attendance-qr@eventverse" width="220" height="220" alt="Mã QR check-in"></p></div></div>`,
+    attachments: [{ filename: `eventverse-checkin-${confirmationCode}.png`, content: qrBuffer, cid: 'attendance-qr@eventverse' }]
+  });
+  return info.messageId;
+}
+
+module.exports = { sendTicketConfirmation, sendPasswordResetEmail, sendBookingReminder, sendAttendanceConfirmation };

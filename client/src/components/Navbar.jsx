@@ -3,17 +3,17 @@ import { useNavigate, Link } from 'react-router-dom';
 import NotificationMenu from './NotificationMenu';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function Navbar({ role, setRole, theme, toggleTheme }) {
+export default function Navbar({ role, setRole, theme, toggleTheme, organizerActive = false }) {
   const [keyword, setKeyword] = useState('');
   const navigate = useNavigate();
   const { lang } = useLanguage();
   const t = lang === 'en' ? {
-    search: 'Search events, workshops, music, art...', home: 'Home', calendar: 'Calendar', feedback: 'Feedback',
+    search: 'Search events, workshops, music, art...', home: 'Home', calendar: 'Calendar', myParticipation: 'My events', feedback: 'Feedback',
     dashboard: 'Dashboard', manage: 'Manage events', create: '+ Create event', cart: 'Cart', tickets: 'My tickets',
     profile: 'Profile 👤', logout: 'Log out', login: 'Log in', register: 'Sign up',
     lightTheme: 'Switch to light mode', darkTheme: 'Switch to dark mode'
   } : {
-    search: 'Tìm kiếm sự kiện, hội thảo, âm nhạc, nghệ thuật...', home: 'Trang chủ', calendar: 'Lịch sự kiện', feedback: 'Góp ý',
+    search: 'Tìm kiếm sự kiện, hội thảo, âm nhạc, nghệ thuật...', home: 'Trang chủ', calendar: 'Lịch sự kiện', myParticipation: 'Lịch của tôi', feedback: 'Góp ý',
     dashboard: 'Dashboard', manage: 'Quản lý sự kiện', create: '+ Tạo sự kiện', cart: 'Giỏ hàng', tickets: 'Vé của tôi',
     profile: 'Hồ Sơ 👤', logout: 'Đăng Xuất', login: 'Đăng Nhập', register: 'Đăng Ký',
     lightTheme: 'Chuyển sang giao diện sáng', darkTheme: 'Chuyển sang giao diện tối'
@@ -30,7 +30,9 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('user');
+    localStorage.removeItem('organizerExpiresAt');
     setRole(null);
+    window.dispatchEvent(new CustomEvent('organizer-updated', { detail: { organizerExpiresAt: null } }));
     navigate('/login');
   };
 
@@ -76,7 +78,8 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
               {t.manage}
             </Link>
           )}
-          {role === 'admin_support' && (
+          {organizerActive && !['admin_support', 'admin_master'].includes(role) && <Link to="/organizer/events" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">Sự kiện của tôi</Link>}
+          {(role === 'admin_support' || organizerActive) && (
               <Link to="/add" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-md transition">
                 {t.create}
               </Link>
@@ -84,8 +87,7 @@ export default function Navbar({ role, setRole, theme, toggleTheme }) {
           {(role === 'user' || role === 'user_vip') && (
             <>
               {role === 'user_vip' && <span className="hidden rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700 xl:inline">👑 VIP</span>}
-              <Link to="/cart" className="font-semibold text-sm hover:text-indigo-600 transition">{t.cart}</Link>
-              <Link to="/my-tickets" className="font-semibold text-sm hover:text-indigo-600 transition hidden sm:block">{t.tickets}</Link>
+              <Link to="/my-participations" className="font-semibold text-sm hover:text-indigo-600 transition">{t.myParticipation} · Nhật ký tham gia</Link>
             </>
           )}
           {role ? (

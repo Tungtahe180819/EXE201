@@ -35,6 +35,12 @@ async function completePaidPayment({ payment, transactionId, providerData, io })
         ? `${result.emailMessage} Gói VIP đã được kích hoạt đến ${vip.vipExpiresAt.toLocaleDateString('vi-VN')}.`
         : `Gói VIP đã được kích hoạt đến ${vip.vipExpiresAt.toLocaleDateString('vi-VN')}.`;
     }
+    let organizer = null;
+    if (claimedPayment.organizerPlan) {
+      organizer = await require('./organizerService').activateOrganizerMonth(claimedPayment.userId);
+      claimedPayment.organizerExpiresAt = organizer.organizerExpiresAt;
+      result.emailMessage = [result.emailMessage, `Gói Ban tổ chức đã được kích hoạt đến ${organizer.organizerExpiresAt.toLocaleDateString('vi-VN')}.`].filter(Boolean).join(' ');
+    }
     claimedPayment.status = 'Paid';
     claimedPayment.paidAt = new Date();
     claimedPayment.tickets = result.tickets.map(ticket => ticket._id);
@@ -43,6 +49,7 @@ async function completePaidPayment({ payment, transactionId, providerData, io })
     await claimedPayment.save();
     io?.emit('payment_updated', { orderCode: claimedPayment.orderCode, status: 'Paid' });
     if (claimedPayment.vipPlan) io?.emit('vip_updated', { userId: String(claimedPayment.userId), role: 'user_vip', vipExpiresAt: claimedPayment.vipExpiresAt });
+    if (organizer) io?.emit('organizer_updated', { userId: String(claimedPayment.userId), organizerExpiresAt: organizer.organizerExpiresAt });
     return claimedPayment;
   } catch (error) {
     await Payment.findByIdAndUpdate(claimedPayment._id, {

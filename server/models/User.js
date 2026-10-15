@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema({
   vipStartedAt: { type: Date, default: null },
   vipExpiresAt: { type: Date, default: null },
   vipSource: { type: String, enum: ['manual', 'payment', null], default: null },
+  organizerStartedAt: { type: Date, default: null },
+  organizerExpiresAt: { type: Date, default: null },
   status: { type: String, enum: ['Active', 'Banned', 'Inactive'], default: 'Active' },
   resetPasswordToken: { type: String, select: false },
   resetPasswordExpires: { type: Date, select: false },

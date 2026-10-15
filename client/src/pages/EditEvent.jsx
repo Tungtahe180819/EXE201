@@ -38,7 +38,7 @@ export default function EditEvent() {
       })
       .catch(() => {
         toast.error('Không tìm thấy sự kiện.');
-        navigate('/admin/events');
+        navigate(localStorage.getItem('role') === 'admin_master' || localStorage.getItem('role') === 'admin_support' ? '/admin/events' : '/organizer/events');
       })
       .finally(() => setLoading(false));
   }, [id, navigate]);
@@ -76,7 +76,7 @@ export default function EditEvent() {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       toast.success('Cập nhật sự kiện thành công!');
-      navigate('/admin/events');
+      navigate(localStorage.getItem('role') === 'admin_master' || localStorage.getItem('role') === 'admin_support' ? '/admin/events' : '/organizer/events');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Không thể cập nhật sự kiện.');
     } finally {
@@ -90,7 +90,7 @@ export default function EditEvent() {
     <div className="mx-auto my-10 max-w-3xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="mb-8 flex items-center justify-between">
         <div><p className="text-sm font-bold uppercase tracking-wider text-indigo-600">Quản lý sự kiện</p><h1 className="text-3xl font-black">Chỉnh sửa sự kiện</h1></div>
-        <button type="button" onClick={() => navigate('/admin/events')} className="font-bold text-slate-500">Quay lại</button>
+        <button type="button" onClick={() => navigate(localStorage.getItem('role') === 'admin_master' || localStorage.getItem('role') === 'admin_support' ? '/admin/events' : '/organizer/events')} className="font-bold text-slate-500">Quay lại</button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">

@@ -11,18 +11,37 @@ export default function AIPlannerModal({ isOpen, onClose }) {
   });
   const [loading, setLoading] = useState(false);
   const [itinerary, setItinerary] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const itineraryText = typeof itinerary === 'string'
+    ? itinerary
+    : itinerary?.summary
+      ? `${itinerary.summary}${itinerary.days?.length ? `\n\n${itinerary.days.map((day, index) => {
+        const date = day.date ? new Date(day.date).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }) : '';
+        return `${index + 1}. ${date ? `${date} — ` : ''}${day.title || day.activity || 'Hoạt động'}${day.venue ? `\n   Địa điểm: ${day.venue}` : ''}${day.price ? `\n   Giá vé: ${day.price}` : ''}${day.description ? `\n   ${day.description}` : ''}`;
+      }).join('\n\n')}` : ''}`
+      : JSON.stringify(itinerary, null, 2);
 
   if (!isOpen) return null;
 
   const handleGenerateItinerary = async () => {
     if (!form.destinationArea || !form.startDate || !form.endDate || !form.userPreferences.trim()) {
-      toast.error("Vui lòng nhập đầy đủ địa điểm, thời gian và sở thích!");
+      const message = "Vui lòng nhập đầy đủ địa điểm, thời gian và sở thích!";
+      setErrorMessage(message);
+      toast.error(message);
+      return;
+    }
+    if (form.endDate < form.startDate) {
+      const message = 'Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.';
+      setErrorMessage(message);
+      toast.error(message);
       return;
     }
 
     try {
+      setErrorMessage('');
       setLoading(true);
       const token = localStorage.getItem('token');
+      if (!token) throw new Error('Vui lòng đăng nhập lại để tạo lịch trình.');
       
       // Gọi API Backend xử lý AI tạo lịch trình
       const res = await axios.post(
@@ -31,10 +50,14 @@ export default function AIPlannerModal({ isOpen, onClose }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setItinerary(res.data.data?.aiGeneratedPlan);
+      const plan = res.data?.data?.aiGeneratedPlan ?? res.data?.data?.plan ?? res.data?.plan;
+      if (!plan) throw new Error('Máy chủ không trả về lịch trình. Vui lòng thử lại.');
+      setItinerary(plan);
       toast.success("AI đã tạo lịch trình thành công cho bạn!");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Lỗi khi tạo lịch trình AI.");
+      const message = err.response?.data?.message || err.message || "Lỗi khi tạo lịch trình AI.";
+      setErrorMessage(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -74,12 +97,17 @@ export default function AIPlannerModal({ isOpen, onClose }) {
               placeholder="Nhập yêu cầu của bạn tại đây..."
               className="w-full p-4 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600 mb-4"
             />
+            {errorMessage && (
+              <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+                {errorMessage}
+              </div>
+            )}
             <button
               onClick={handleGenerateItinerary}
               disabled={loading}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-2xl transition shadow-lg"
             >
-              {loading ? 'AI đang phân tích và lên lịch...' : 'Tạo Lịch Trình Ngay'}
+              {loading ? 'AI đang phân tích và lên lịch...' : 'Phân tích & Tạo Lịch Trình'}
             </button>
           </div>
         ) : (
@@ -87,7 +115,7 @@ export default function AIPlannerModal({ isOpen, onClose }) {
             <h3 className="text-lg font-bold mb-3 text-indigo-600">✨ Lịch trình gợi ý dành riêng cho bạn:</h3>
             <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl max-h-80 overflow-y-auto mb-6 space-y-3 text-sm">
               {/* Hiển thị kết quả AI trả về */}
-              <pre className="whitespace-pre-wrap leading-relaxed font-sans">{typeof itinerary === 'string' ? itinerary : JSON.stringify(itinerary, null, 2)}</pre>
+              <pre className="whitespace-pre-wrap leading-relaxed font-sans">{itineraryText}</pre>
             </div>
             <div className="flex gap-4">
               <button

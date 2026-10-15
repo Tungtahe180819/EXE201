@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { ORGANIZER_PLAN_ID, ORGANIZER_PLAN_ITEM } from '../utils/organizerPlan';
 
 export default function Profile() {
   const [profile, setProfile] = useState({ name: '', email: '', phone: '', avatar: '', bio: '', history: [] });
@@ -7,6 +9,15 @@ export default function Profile() {
   const [message, setMessage] = useState('');
 
   const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+
+  const addOrganizerPlanToCart = () => {
+    let cart;
+    try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch { cart = []; }
+    if (!cart.some(item => item._id === ORGANIZER_PLAN_ID)) cart.push(ORGANIZER_PLAN_ITEM);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    navigate('/cart');
+  };
 
   useEffect(() => {
     axios.get('/api/user/profile', {
@@ -57,6 +68,7 @@ export default function Profile() {
             <span className={`inline-block mt-2 text-xs px-3 py-1 rounded-full font-bold ${profile.role === 'user_vip' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300' : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300'}`}>
               {profile.role === 'user_vip' ? `👑 VIP đến ${new Date(profile.vipExpiresAt).toLocaleDateString('vi-VN')}` : 'Thành viên Eventverse'}
             </span>
+            {profile.organizerExpiresAt && new Date(profile.organizerExpiresAt) > new Date() && <span className="ml-2 inline-block mt-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">🎪 Ban tổ chức đến {new Date(profile.organizerExpiresAt).toLocaleDateString('vi-VN')}</span>}
           </div>
         </div>
 
@@ -74,6 +86,26 @@ export default function Profile() {
             {profile.role !== 'user_vip' && (
               <p className="mt-3 text-xs font-semibold">Thanh toán bằng VietQR để hệ thống tự động kích hoạt VIP. Admin Master vẫn có thể hỗ trợ kích hoạt thủ công khi cần.</p>
             )}
+          </section>
+        )}
+
+        {(profile.role === 'user' || profile.role === 'user_vip') && (
+          <section className="mb-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5 text-indigo-950 dark:border-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-100">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="text-lg font-black">🎪 Gói Ban tổ chức — 79.000đ / 30 ngày</h2>
+                <p className="mt-1 text-sm">Tối đa 5 sự kiện/tháng, 200 người mỗi sự kiện; QR check-in, nhắc lịch, thống kê, xuất CSV, trang sự kiện tùy chỉnh, hỗ trợ email và không quảng cáo.</p>
+                <p className="mt-2 text-xs font-semibold">Thanh toán thủ công qua VietQR/payOS; gói hết hạn sau 30 ngày và có thể gia hạn bằng lần thanh toán mới.</p>
+              </div>
+              <div className="flex shrink-0 flex-col items-center gap-2">
+                <span className="whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-black text-indigo-700 shadow-sm dark:bg-indigo-900 dark:text-indigo-100">
+                  {profile.organizerExpiresAt && new Date(profile.organizerExpiresAt) > new Date() ? `Đến ${new Date(profile.organizerExpiresAt).toLocaleDateString('vi-VN')}` : 'Chưa đăng ký'}
+                </span>
+                <button onClick={addOrganizerPlanToCart} className="rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white hover:bg-indigo-700">
+                  {profile.organizerExpiresAt && new Date(profile.organizerExpiresAt) > new Date() ? 'Gia hạn gói' : 'Đăng ký Ban tổ chức'}
+                </button>
+              </div>
+            </div>
           </section>
         )}
 

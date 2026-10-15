@@ -12,7 +12,7 @@ export default function NotificationMenu() {
       try {
         const { data } = await axios.get('/api/user/notifications', { headers: { Authorization: `Bearer ${token}` } });
         setItems(data);
-        const unseenReminder = data.find(item => item.type === 'reminder' && !item.isRead);
+        const unseenReminder = data.find(item => ['reminder', 'system'].includes(item.type) && !item.isRead);
         if (unseenReminder && 'Notification' in window && Notification.permission === 'granted') {
           new Notification('Eventverse nhắc lịch', { body: unseenReminder.message });
         }

@@ -1,24 +1,25 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import io from 'socket.io-client';
+import { QRCodeCanvas } from 'qrcode.react';
 import EventReviewSection from '../components/EventReviewSection';
-import { formatEventPrice } from '../utils/formatPrice';
 
 const socket = io(import.meta.env.VITE_SOCKET_URL || window.location.origin);
 
 export default function EventDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
-  const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [bookingTime, setBookingTime] = useState('');
   const [booking, setBooking] = useState(false);
+  const [attendance, setAttendance] = useState({ interested: 0, remaining: null });
+  const [registered, setRegistered] = useState(null);
 
   const role = localStorage.getItem("role");
   const isAdmin = role === "admin_master" || role === "admin_support";
+  const [isOrganizer] = useState(() => Date.parse(localStorage.getItem('organizerExpiresAt') || '') > Date.now());
+  const canManageEvent = isAdmin || isOrganizer;
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -26,6 +27,14 @@ export default function EventDetail() {
       try {
         const res = await axios.get(`/api/events/${id}`);
         setEvent(res.data);
+        try {
+          const summary = await axios.get(`/api/bookings/event/${id}/summary`);
+          setAttendance(summary.data);
+        } catch { /* Event detail remains usable if availability summary is temporarily unavailable. */ }
+        if (localStorage.getItem('token')) {
+          const mine = await axios.get('/api/bookings/mine', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+          setRegistered(mine.data.find(item => item.eventId?._id === id && item.status !== 'cancelled') || null);
+        }
       } catch (err) {
         toast.error("Không tìm thấy sự kiện");
         console.error(err);
@@ -35,13 +44,16 @@ export default function EventDetail() {
     };
     fetchEvent();
 
-    socket.on('ticket_updated', (data) => {
+    const updateCount = (data) => {
       if (data.eventId === id) {
-        setEvent(prev => ({ ...prev, bookedSlots: data.bookedSlots }));
+        setEvent(prev => prev ? ({ ...prev, bookedSlots: data.bookedSlots }) : prev);
+        axios.get(`/api/bookings/event/${id}/summary`).then(res => setAttendance(res.data)).catch(() => undefined);
       }
-    });
+    };
+    socket.on('ticket_updated', updateCount);
+    socket.on('attendance_updated', updateCount);
 
-    return () => socket.off('ticket_updated');
+    return () => { socket.off('ticket_updated', updateCount); socket.off('attendance_updated', updateCount); };
   }, [id]);
 
   const calendarDates = () => {
@@ -70,15 +82,23 @@ export default function EventDetail() {
   };
 
   const handleBooking = async () => {
-    if (!token) return toast.error('Vui lòng đăng nhập để đặt lịch.');
-    if (!bookingTime) return toast.error('Vui lòng chọn khung giờ.');
+    if (!token) return toast.error('Vui lòng đăng nhập để xác nhận tham gia.');
+    if (registered) return toast.error('Bạn đã xác nhận tham gia sự kiện này.');
     try {
       setBooking(true);
-      const { data } = await axios.post('/api/bookings', { eventId: event._id, bookingTime: new Date(bookingTime).toISOString() }, {
+      const { data } = await axios.post('/api/bookings', { eventId: event._id }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success(data.message);
-      if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+      setRegistered(data.booking);
+      setAttendance(current => ({ ...current, interested: current.interested + 1, remaining: Math.max(0, current.remaining - 1) }));
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') new Notification('Eventverse', { body: `Bạn đã xác nhận tham gia ${event.title}.` });
+        });
+      } else if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Eventverse', { body: `Bạn đã xác nhận tham gia ${event.title}.` });
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Không thể đặt lịch.');
     } finally {
@@ -86,52 +106,10 @@ export default function EventDetail() {
     }
   };
 
-  // 👉 HÀM ĐÃ ĐƯỢC VIẾT LẠI ĐỂ ĐẢM BẢO KHỚP VỚI BACKEND
-  const handleAddToCart = async () => {
-    if (isAdmin) {
-      toast.error("Admin không được phép mua vé!");
-      return;
-    }
-
-    if (!token) {
-      toast.error("Vui lòng đăng nhập trước khi đặt vé!");
-      return;
-    }
-
-    if (!event) {
-        toast.error("Thông tin sự kiện chưa tải xong!");
-        return;
-    }
-
-    const qty = Number(quantity);
-    try {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const existingIndex = cart.findIndex(item => item._id === event._id);
-      if (existingIndex > -1) {
-        const nextQuantity = cart[existingIndex].quantity + qty;
-        if (nextQuantity > remaining || nextQuantity > 20) {
-          toast.error('Số lượng trong giỏ vượt quá số vé có thể mua.');
-          return;
-        }
-        cart[existingIndex].quantity = nextQuantity;
-      } else {
-        cart.push({ ...event, quantity: qty });
-      }
-      localStorage.setItem('cart', JSON.stringify(cart));
-      toast.success('Đã thêm vé vào giỏ hàng!');
-      navigate('/cart');
-    } catch (err) {
-      toast.error('Không thể cập nhật giỏ hàng.');
-      console.error('Lỗi giỏ hàng:', err);
-    }
-  };
-
   if (loading) return <div className="p-20 text-center text-slate-500">Đang tải thông tin...</div>;
   if (!event) return <div className="p-20 text-center text-red-500 font-bold">Sự kiện không tồn tại.</div>;
 
-  const maxTickets = event.maxTickets || event.totalSlots || 100;
-  const soldCount = event.ticketsSold || event.bookedSlots || 0;
-  const remaining = Math.max(0, maxTickets - soldCount);
+  const remaining = attendance.remaining ?? Math.max(0, (event.totalSlots || 100) - (event.bookedSlots || 0));
 
   const locationString = typeof event.location === 'object' 
     ? `${event.location.address || ''}, ${event.location.city || 'Hà Nội'}` 
@@ -165,7 +143,7 @@ export default function EventDetail() {
           📍 Địa điểm: {locationString}
         </div>
         <div className={`p-4 rounded-2xl ${remaining === 0 ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
-          🎟️ Vé còn lại: {remaining} vé (Tổng: {maxTickets})
+          👥 Đã có {attendance.interested} người quan tâm · Còn {remaining} chỗ
         </div>
       </div>
 
@@ -188,44 +166,18 @@ export default function EventDetail() {
       </div>
 
       <div className="mb-8 flex flex-wrap gap-3">
-        <button onClick={openGoogleCalendar} className="px-5 py-3 bg-blue-600 text-white font-bold rounded-2xl">Google Calendar</button>
+        <button onClick={openGoogleCalendar} className="px-5 py-3 bg-blue-600 text-white font-bold rounded-2xl">Lưu lịch · Google Calendar</button>
         <button onClick={openOutlookCalendar} className="px-5 py-3 bg-sky-700 text-white font-bold rounded-2xl">Outlook Calendar</button>
       </div>
 
-      {!isAdmin && token && remaining > 0 && (
-        <div className="mb-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5 dark:border-indigo-900 dark:bg-indigo-950/30">
-          <h3 className="mb-3 font-bold">Đặt lịch tham gia và nhận nhắc lịch</h3>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <input type="datetime-local" value={bookingTime} min={event.startDate ? new Date(new Date(event.startDate).getTime() - new Date(event.startDate).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : undefined} max={event.endDate ? new Date(new Date(event.endDate).getTime() - new Date(event.endDate).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : undefined} onChange={e => setBookingTime(e.target.value)} className="flex-1 rounded-xl border bg-white p-3 dark:bg-slate-900" />
-            <button onClick={handleBooking} disabled={booking} className="rounded-xl bg-indigo-600 px-6 py-3 font-bold text-white disabled:opacity-60">{booking ? 'Đang đặt...' : 'Đặt lịch'}</button>
-          </div>
-          <p className="mt-2 text-xs text-slate-500">Hệ thống sẽ gửi email và thông báo trước giờ hẹn 30 phút.</p>
-        </div>
-      )}
-
-      {!isAdmin && remaining > 0 && (
-        <div className="flex items-center gap-4 mb-8">
-          <span className="text-sm font-bold text-slate-500">Số lượng:</span>
-          <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-10 h-10 border rounded-xl font-bold flex items-center justify-center">-</button>
-          <span className="text-xl font-black w-10 text-center">{quantity}</span>
-          <button onClick={() => setQuantity(q => Math.min(remaining, q + 1))} className="w-10 h-10 border rounded-xl font-bold flex items-center justify-center">+</button>
-        </div>
-      )}
-
-      {isAdmin ? (
-        <button disabled className="w-full bg-slate-200 dark:bg-slate-800 text-slate-400 py-4 rounded-2xl font-bold cursor-not-allowed">
-          Admin không được phép mua vé
-        </button>
+      {registered && <div className="mb-6 flex flex-col items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center dark:border-emerald-900 dark:bg-emerald-950/30"><p className="font-bold text-emerald-700 dark:text-emerald-300">Bạn đã xác nhận tham gia · Mã check-in: {registered.confirmationCode}</p><QRCodeCanvas value={JSON.stringify({ bookingId: registered._id, confirmationCode: registered.confirmationCode })} size={150} includeMargin /><p className="text-xs text-slate-500">Mã QR cũng đã được gửi đến email tài khoản của bạn (nếu email hoạt động).</p></div>}
+      {canManageEvent ? (
+        <a href={`/api/bookings/event/${event._id}/attendees.csv`} onClick={e => { e.preventDefault(); axios.get(`/api/bookings/event/${event._id}/attendees.csv`, { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' }).then(({ data }) => { const url = URL.createObjectURL(data); const link = document.createElement('a'); link.href = url; link.download = `event-attendees-${event._id}.csv`; link.click(); URL.revokeObjectURL(url); }).catch(() => toast.error('Không thể xuất danh sách người tham gia.')); }} className="mb-3 block w-full rounded-2xl border border-indigo-200 px-5 py-3 text-center font-bold text-indigo-700 dark:border-indigo-900 dark:text-indigo-300">Xuất danh sách tham gia CSV</a>
       ) : remaining === 0 ? (
-        <button disabled className="w-full bg-red-500 text-white py-4 rounded-2xl font-bold cursor-not-allowed opacity-80">
-          Hết vé (Fully Booked)
-        </button>
+        <button disabled className="w-full cursor-not-allowed rounded-2xl bg-red-500 py-4 font-bold text-white opacity-80">Đã hết chỗ</button>
       ) : (
-        <button
-          onClick={handleAddToCart}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-bold shadow-lg transition mb-8"
-        >
-          Thêm vào giỏ hàng - {formatEventPrice((Number(event.price) || 0) * quantity)}
+        <button onClick={handleBooking} disabled={booking || !!registered} className="mb-8 w-full rounded-2xl bg-indigo-600 py-4 font-bold text-white shadow-lg transition hover:bg-indigo-700 disabled:opacity-60">
+          {booking ? 'Đang xác nhận...' : registered ? 'Đã xác nhận tham gia' : 'Xác nhận tham gia'}
         </button>
       )}
 

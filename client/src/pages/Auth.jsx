@@ -42,6 +42,8 @@ export default function Auth({ setRole }) {
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('role', res.data.role);
         localStorage.setItem('user', JSON.stringify(res.data.user));
+        localStorage.setItem('organizerExpiresAt', res.data.user.organizerExpiresAt || '');
+        window.dispatchEvent(new CustomEvent('organizer-updated', { detail: { organizerExpiresAt: res.data.user.organizerExpiresAt } }));
         if (setRole) setRole(res.data.role);
         const redirect = localStorage.getItem('postLoginRedirect') || '/';
         localStorage.removeItem('postLoginRedirect');

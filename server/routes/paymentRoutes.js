@@ -7,6 +7,7 @@ const { quoteOrder, fulfillOrder } = require('../services/checkoutService');
 const { createPayOSPayment, getPayOSPayment, verifyPayOSWebhook } = require('../services/paymentGatewayService');
 const { completePaidPayment } = require('../services/paymentFulfillmentService');
 const { isCustomerRole, isVipActive, VIP_ANNUAL_PRICE } = require('../utils/vip');
+const { ORGANIZER_PLAN_PRICE, isOrganizerActive } = require('../utils/organizerPlan');
 
 const router = express.Router();
 
@@ -42,7 +43,7 @@ async function ensurePaidVipApplied(payment) {
 }
 
 async function reconcileWithPayOS(payment, io) {
-  if (payment.status !== 'Pending') return ensurePaidVipApplied(payment);
+  if (payment.status !== 'Pending') return ensurePaidOrganizerApplied(await ensurePaidVipApplied(payment));
   const payOSPayment = await getPayOSPayment(payment.orderCode);
   const gatewayStatus = String(payOSPayment.status || '').toUpperCase();
   if (gatewayStatus !== 'PAID') return payment;
@@ -62,17 +63,31 @@ async function reconcileWithPayOS(payment, io) {
     providerData: payOSPayment,
     io
   });
-  return ensurePaidVipApplied(completed);
+  return ensurePaidOrganizerApplied(await ensurePaidVipApplied(completed));
+}
+
+async function ensurePaidOrganizerApplied(payment) {
+  if (!payment?.organizerPlan || payment.status !== 'Paid') return payment;
+  if (payment.organizerExpiresAt) return payment;
+  const user = await User.findById(payment.userId).select('status organizerExpiresAt');
+  if (!user || user.status !== 'Active') return payment;
+  if (isOrganizerActive(user)) return payment;
+  const result = await require('../services/organizerService').activateOrganizerMonth(payment.userId);
+  payment.organizerExpiresAt = result.organizerExpiresAt;
+  payment.providerResponse = { ...(payment.providerResponse || {}), organizerRecoveredAt: new Date().toISOString() };
+  await payment.save();
+  return payment;
 }
 
 async function publicPaymentResponse(payment) {
   const publicPayment = await Payment.findById(payment._id)
-    .select('orderCode amount provider purpose vipPlan vipExpiresAt status transactionId tickets paidAt emailSent emailMessage createdAt');
-  const user = await User.findById(payment.userId).select('role vipExpiresAt');
+    .select('orderCode amount provider purpose vipPlan vipExpiresAt organizerPlan organizerExpiresAt status transactionId tickets paidAt emailSent emailMessage createdAt');
+  const user = await User.findById(payment.userId).select('role vipExpiresAt organizerExpiresAt');
   return {
     ...publicPayment.toObject(),
     userRole: user?.role,
-    vipExpiresAt: publicPayment.vipExpiresAt || user?.vipExpiresAt || null
+    vipExpiresAt: publicPayment.vipExpiresAt || user?.vipExpiresAt || null,
+    organizerExpiresAt: publicPayment.organizerExpiresAt || user?.organizerExpiresAt || null
   };
 }
 
@@ -83,8 +98,9 @@ router.post('/create', verifyToken, async (req, res) => {
     if (provider !== 'payos') return res.status(400).json({ message: 'Hệ thống hiện chỉ hỗ trợ thanh toán VietQR qua payOS.' });
 
     const wantsVip = req.body.vipPlan === true;
+    const wantsOrganizerPlan = req.body.organizerPlan === true;
     const rawItems = Array.isArray(req.body.items) ? req.body.items : [];
-    if (!wantsVip && rawItems.length === 0) return res.status(400).json({ message: 'Giỏ hàng đang trống.' });
+    if (!wantsVip && !wantsOrganizerPlan && rawItems.length === 0) return res.status(400).json({ message: 'Giỏ hàng đang trống.' });
 
     let items = [];
     let ticketAmount = 0;
@@ -93,11 +109,11 @@ router.post('/create', verifyToken, async (req, res) => {
       items = quote.items;
       ticketAmount = quote.amount;
     }
-    const amount = ticketAmount + (wantsVip ? VIP_ANNUAL_PRICE : 0);
+    const amount = ticketAmount + (wantsVip ? VIP_ANNUAL_PRICE : 0) + (wantsOrganizerPlan ? ORGANIZER_PLAN_PRICE : 0);
     if (amount < 1000) return res.status(400).json({ message: 'Cổng thanh toán yêu cầu đơn hàng tối thiểu 1.000₫.' });
     const orderCode = createOrderCode();
-    const purpose = wantsVip ? (items.length ? 'mixed' : 'vip') : 'tickets';
-    const payment = await Payment.create({ orderCode: String(orderCode), userId: req.user.id, items, amount, purpose, vipPlan: wantsVip, provider: 'payos' });
+    const purpose = (wantsVip || wantsOrganizerPlan) ? (items.length || (wantsVip && wantsOrganizerPlan) ? 'mixed' : wantsVip ? 'vip' : 'organizer') : 'tickets';
+    const payment = await Payment.create({ orderCode: String(orderCode), userId: req.user.id, items, amount, purpose, vipPlan: wantsVip, organizerPlan: wantsOrganizerPlan, provider: 'payos' });
 
     try {
       const gateway = await createPayOSPayment({ orderCode, amount });
@@ -109,8 +125,8 @@ router.post('/create', verifyToken, async (req, res) => {
         orderCode: String(orderCode),
         amount,
         ...publicGateway,
-        message: wantsVip
-          ? 'Đã tạo mã VietQR payOS. Gói VIP sẽ tự động kích hoạt sau khi giao dịch được xác nhận.'
+        message: (wantsVip || wantsOrganizerPlan)
+          ? 'Đã tạo mã VietQR payOS. Gói dịch vụ sẽ tự động kích hoạt sau khi giao dịch được xác nhận.'
           : 'Đã tạo mã VietQR payOS. Hệ thống sẽ tự động phát hành vé sau khi nhận được xác nhận thanh toán.'
       });
     } catch (error) {
@@ -210,6 +226,15 @@ router.get('/status/latest-vip', verifyToken, async (req, res) => {
   } catch (error) {
     console.error(`Không thể khôi phục đơn VIP ${payment.orderCode}:`, error.message);
   }
+  return res.json(await publicPaymentResponse(payment));
+});
+
+router.get('/status/latest-organizer', verifyToken, async (req, res) => {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  let payment = await Payment.findOne({ userId: req.user.id, organizerPlan: true, createdAt: { $gte: since }, status: { $in: ['Pending', 'Processing', 'Paid'] } }).sort({ createdAt: -1 });
+  if (!payment) return res.status(404).json({ message: 'Không tìm thấy giao dịch ban tổ chức gần đây.' });
+  try { payment = await reconcileWithPayOS(payment, req.io); }
+  catch (error) { console.error(`Không thể khôi phục gói ban tổ chức ${payment.orderCode}:`, error.message); }
   return res.json(await publicPaymentResponse(payment));
 });
 

@@ -33,6 +33,10 @@ export default function AddEvent() {
             toast.error("Giá vé hoặc số lượng vé không hợp lệ!");
             return;
         }
+        if (localStorage.getItem('organizerExpiresAt') && Date.parse(localStorage.getItem('organizerExpiresAt')) > Date.now() && Number(formData.totalSlots) > 200) {
+            toast.error('Gói Ban tổ chức giới hạn tối đa 200 người mỗi sự kiện.');
+            return;
+        }
 
         const payload = {
             title: formData.title,
@@ -61,7 +65,7 @@ export default function AddEvent() {
             
             // 3. Thông báo và chuyển hướng về trang chủ
             toast.success('Đăng sự kiện thành công! 🎉');
-            navigate('/admin/events');
+            navigate(localStorage.getItem('role') === 'admin_support' ? '/admin/events' : '/organizer/events');
             
         } catch (err) {
             console.error(err);

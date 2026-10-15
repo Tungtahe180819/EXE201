@@ -9,8 +9,10 @@ const paymentSchema = new mongoose.Schema({
     ticketType: { type: String, default: 'Standard' }
   }],
   amount: { type: Number, required: true, min: 0 },
-  purpose: { type: String, enum: ['tickets', 'vip', 'mixed'], default: 'tickets' },
+  purpose: { type: String, enum: ['tickets', 'vip', 'organizer', 'mixed'], default: 'tickets' },
   vipPlan: { type: Boolean, default: false },
+  organizerPlan: { type: Boolean, default: false },
+  organizerExpiresAt: { type: Date, default: null },
   vipExpiresAt: { type: Date, default: null },
   provider: { type: String, enum: ['payos'], required: true },
   status: { type: String, enum: ['Pending', 'Processing', 'Paid', 'Failed', 'Cancelled'], default: 'Pending', index: true },

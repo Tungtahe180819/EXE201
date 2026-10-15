@@ -31,12 +31,12 @@ export default function EventCalendar() {
       })
       .finally(() => setLoading(false));
     const token = localStorage.getItem('token');
-    if (token && localStorage.getItem('role') === 'user') {
+    if (token && ['user', 'user_vip'].includes(localStorage.getItem('role'))) {
       axios.get('/api/bookings/mine', { headers: { Authorization: `Bearer ${token}` } })
         .then(res => {
           const bookings = res.data.filter(item => item.status !== 'cancelled').map(item => ({
             id: `booking-${item._id}`,
-            title: `Đã đặt: ${item.eventId?.title || 'Sự kiện'}`,
+            title: `Đã xác nhận: ${item.eventId?.title || 'Sự kiện'}`,
             start: item.bookingTime,
             backgroundColor: '#059669'
           }));
@@ -70,7 +70,7 @@ export default function EventCalendar() {
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 my-8">
       <h2 className="text-2xl font-black mb-2">📅 Lịch Trình & Sự Kiện Tổng Quan</h2>
-      <p className="mb-6 text-sm text-slate-500">Xem theo tháng, tuần hoặc ngày. Quản trị viên có thể kéo thả để đổi lịch.</p>
+      <p className="mb-6 text-sm text-slate-500">Xem sự kiện đã lưu và các hoạt động bạn đã xác nhận tham gia. Quản trị viên có thể kéo thả để đổi lịch.</p>
       {loading ? (
         <div className="grid h-[650px] place-items-center rounded-2xl bg-slate-50 dark:bg-slate-950">
           <p className="font-semibold text-indigo-600">Đang tải lịch sự kiện...</p>

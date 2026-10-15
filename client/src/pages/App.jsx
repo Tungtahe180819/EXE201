@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Toaster } from "react-hot-toast";
 
 // Vì App.jsx nằm trong thư mục pages, cần lùi 1 cấp (../) để trỏ ra thư mục components
 import Navbar from "../components/Navbar";
@@ -24,6 +25,8 @@ import MyTickets from './MyTickets';
 import TicketDetail from './TicketDetail';
 import EditEvent from './EditEvent';
 import EventCalendar from './EventCalendar';
+import MyParticipations from './MyParticipations';
+import OrganizerEvents from './OrganizerEvents';
 import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
 import ContactSurveyModal from '../components/ContactSurveyModal';
@@ -31,6 +34,11 @@ import { LanguageContext } from '../context/LanguageContext';
 
 function App() {
   const [role, setRole] = useState(localStorage.getItem("role"));
+  const [organizerActive, setOrganizerActive] = useState(() => {
+    let user = {};
+    try { user = JSON.parse(localStorage.getItem('user') || '{}'); } catch { /* Ignore invalid cached profile. */ }
+    return Date.parse(localStorage.getItem('organizerExpiresAt') || user.organizerExpiresAt || '') > Date.now();
+  });
   const isCustomer = role === 'user' || role === 'user_vip';
   const [lang, updateLang] = useState(localStorage.getItem('lang') || 'vi');
   const [theme, setTheme] = useState(() => {
@@ -46,9 +54,15 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    const syncRole = event => setRole(event.detail?.role || localStorage.getItem('role'));
+    const syncRole = event => {
+      setRole(event.detail?.role || localStorage.getItem('role'));
+      const stored = JSON.parse(localStorage.getItem('user') || '{}');
+      setOrganizerActive(Date.parse(event.detail?.organizerExpiresAt || stored.organizerExpiresAt || localStorage.getItem('organizerExpiresAt') || '') > Date.now());
+    };
+    const syncOrganizer = event => setOrganizerActive(Date.parse(event.detail?.organizerExpiresAt || '') > Date.now());
     window.addEventListener('role-updated', syncRole);
-    return () => window.removeEventListener('role-updated', syncRole);
+    window.addEventListener('organizer-updated', syncOrganizer);
+    return () => { window.removeEventListener('role-updated', syncRole); window.removeEventListener('organizer-updated', syncOrganizer); };
   }, []);
 
   const toggleTheme = () => setTheme(current => current === 'dark' ? 'light' : 'dark');
@@ -62,7 +76,8 @@ function App() {
     <LanguageContext.Provider value={{ lang, setLang }}>
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-        <Navbar role={role} setRole={setRole} theme={theme} toggleTheme={toggleTheme} />
+        <Toaster position="top-right" toastOptions={{ duration: 4500 }} />
+        <Navbar role={role} setRole={setRole} theme={theme} toggleTheme={toggleTheme} organizerActive={organizerActive} />
 
         <main className="flex-grow">
           <Routes>
@@ -78,6 +93,8 @@ function App() {
 
             {/* Route cho Lịch Trình & Sự Kiện */}
             <Route path="/calendar" element={<EventCalendar />} />
+            <Route path="/my-participations" element={isCustomer ? <MyParticipations /> : <Navigate to="/login" />} />
+            <Route path="/organizer/events" element={organizerActive || role === 'admin_support' || role === 'admin_master' ? <OrganizerEvents /> : <Navigate to="/profile" />} />
 
             <Route path="/cart" element={isCustomer ? <Cart /> : <Navigate to="/login" />} />
             <Route path="/my-tickets" element={isCustomer ? <MyTickets /> : <Navigate to="/login" />} />
@@ -96,8 +113,8 @@ function App() {
 
             {/* Admin Master và Admin Support cùng quản lý; chỉ Admin Support được tạo mới */}
             <Route path="/admin/events" element={(role === "admin_master" || role === "admin_support") ? <AdminEvents /> : <Navigate to="/" />} />
-            <Route path="/add" element={role === "admin_support" ? <AddEvent /> : <Navigate to="/admin/events" replace />} />
-            <Route path="/edit-event/:id" element={(role === "admin_master" || role === "admin_support") ? <EditEvent /> : <Navigate to="/" />} />
+            <Route path="/add" element={role === "admin_support" || organizerActive ? <AddEvent /> : <Navigate to="/profile" replace />} />
+            <Route path="/edit-event/:id" element={(role === "admin_master" || role === "admin_support" || organizerActive) ? <EditEvent /> : <Navigate to="/" />} />
 
             {/* Chuyển hướng về trang chủ nếu nhập sai URL */}
             <Route path="*" element={<Navigate to="/" />} />

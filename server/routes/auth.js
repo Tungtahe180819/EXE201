@@ -53,7 +53,8 @@ router.post('/login', async (req, res) => {
         avatar: user.avatar || '',
         bio: user.bio || '',
         role: user.role || 'user',
-        vipExpiresAt: user.vipExpiresAt || null
+        vipExpiresAt: user.vipExpiresAt || null,
+        organizerExpiresAt: user.organizerExpiresAt || null
       } 
     });
   } catch (err) {

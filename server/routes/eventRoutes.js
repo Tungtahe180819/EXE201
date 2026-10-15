@@ -6,6 +6,7 @@ const { exportEventToICS } = require('../controllers/icsController'); // 🌟 T�
 const jwt = require('jsonwebtoken');
 const verifyToken = require('../middleware/verifyToken');
 const requireVip = require('../middleware/requireVip');
+const { isOrganizerActive, ORGANIZER_MONTHLY_EVENT_LIMIT, ORGANIZER_EVENT_ATTENDEE_LIMIT } = require('../utils/organizerPlan');
 
 /**
  * Middleware: Xác thực JWT và kiểm tra quyền
@@ -32,6 +33,11 @@ const verifyRole = (requiredRoles) => (req, res, next) => {
         return res.status(403).json({ message: "Token không hợp lệ hoặc đã hết hạn!" });
     }
 };
+
+function canManageEvent(event, user) {
+    return ['admin_master', 'admin_support'].includes(user.role)
+        || (isOrganizerActive(user) && String(event.createdBy || '') === String(user.id));
+}
 
 // --- 1. ROUTES AI ---
 router.post('/chat', verifyToken, requireVip, chatbotSupport);
@@ -87,8 +93,11 @@ router.post('/export-ics', exportEventToICS);
 
 // --- 4. ROUTES QUẢN LÝ SỰ KIỆN CƠ BẢN ---
 // Admin Support phụ trách tạo sự kiện; Admin Master chỉ quản lý sự kiện đã có.
-router.post('/', verifyRole(['admin_support']), async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
     try {
+        const isAdminSupport = req.user.role === 'admin_support';
+        const isPaidOrganizer = isOrganizerActive(req.user);
+        if (!isAdminSupport && !isPaidOrganizer) return res.status(403).json({ message: 'Bạn cần đăng ký gói Ban tổ chức 79.000đ/tháng để tạo sự kiện.' });
         const {
             title, category, description, startDate, endDate,
             location, price, stock, totalSlots, image, recurrence, timezone
@@ -107,6 +116,7 @@ router.post('/', verifyRole(['admin_support']), async (req, res) => {
         if (!Number.isFinite(slotCount) || slotCount < 1 || !Number.isFinite(eventPrice) || eventPrice < 0) {
             return res.status(400).json({ message: 'Giá vé hoặc số lượng vé không hợp lệ.' });
         }
+        if (isPaidOrganizer && slotCount > ORGANIZER_EVENT_ATTENDEE_LIMIT) return res.status(400).json({ message: `Gói Ban tổ chức giới hạn tối đa ${ORGANIZER_EVENT_ATTENDEE_LIMIT} người cho mỗi sự kiện.` });
 
         const baseEvent = {
             title: String(title).trim(),
@@ -149,12 +159,30 @@ router.post('/', verifyRole(['admin_support']), async (req, res) => {
             }
         }
 
+        if (isPaidOrganizer) {
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            const currentCount = await Event.countDocuments({ createdBy: req.user.id, createdAt: { $gte: monthStart, $lt: nextMonth } });
+            if (currentCount + eventsToCreate.length > ORGANIZER_MONTHLY_EVENT_LIMIT) {
+                return res.status(400).json({ message: `Gói Ban tổ chức giới hạn ${ORGANIZER_MONTHLY_EVENT_LIMIT} sự kiện mỗi tháng; bạn đã tạo ${currentCount} trong tháng này.` });
+            }
+        }
+
         const createdEvents = await Event.insertMany(eventsToCreate);
         createdEvents.forEach(event => req.io.emit('event_created', event));
         return res.status(201).json({ message: `Tạo thành công ${createdEvents.length} sự kiện!`, event: createdEvents[0], events: createdEvents });
     } catch (err) {
         return res.status(400).json({ message: 'Lỗi khi tạo sự kiện: ' + err.message });
     }
+});
+
+router.get('/mine', verifyToken, async (req, res) => {
+    if (!['admin_master', 'admin_support'].includes(req.user.role) && !isOrganizerActive(req.user)) {
+        return res.status(403).json({ message: 'Bạn cần gói Ban tổ chức còn hạn để quản lý sự kiện.' });
+    }
+    const events = await Event.find(['admin_master', 'admin_support'].includes(req.user.role) ? {} : { createdBy: req.user.id }).sort({ startDate: 1 });
+    return res.json(events);
 });
 
 router.get('/', async (req, res) => {
@@ -192,7 +220,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.put('/:id', verifyRole(['admin_master', 'admin_support']), async (req, res) => {
+router.put('/:id', verifyToken, async (req, res) => {
     try {
         const allowedFields = ['title', 'category', 'description', 'startDate', 'endDate', 'location', 'price', 'stock', 'totalSlots', 'image', 'recurrence', 'timezone'];
         const changes = Object.fromEntries(
@@ -200,6 +228,9 @@ router.put('/:id', verifyRole(['admin_master', 'admin_support']), async (req, re
         );
         const currentEvent = await Event.findById(req.params.id);
         if (!currentEvent) return res.status(404).json({ message: "Không tìm thấy sự kiện để sửa!" });
+        if (!canManageEvent(currentEvent, req.user)) return res.status(403).json({ message: 'Bạn không có quyền chỉnh sửa sự kiện này.' });
+        if (isOrganizerActive(req.user) && Number(changes.totalSlots ?? currentEvent.totalSlots) > ORGANIZER_EVENT_ATTENDEE_LIMIT) return res.status(400).json({ message: `Gói Ban tổ chức giới hạn ${ORGANIZER_EVENT_ATTENDEE_LIMIT} người mỗi sự kiện.` });
+        if (Number(changes.totalSlots ?? currentEvent.totalSlots) < Number(currentEvent.bookedSlots || 0)) return res.status(400).json({ message: 'Số chỗ không thể nhỏ hơn số người đã xác nhận tham gia.' });
 
         const startDateChanged = changes.startDate && new Date(changes.startDate).getTime() !== currentEvent.startDate.getTime();
         const endDateChanged = changes.endDate && new Date(changes.endDate).getTime() !== currentEvent.endDate?.getTime();
@@ -215,8 +246,11 @@ router.put('/:id', verifyRole(['admin_master', 'admin_support']), async (req, re
     }
 });
 
-router.delete('/:id', verifyRole(['admin_master', 'admin_support']), async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
     try {
+        const event = await Event.findById(req.params.id);
+        if (!event) return res.status(404).json({ message: "Không tìm thấy sự kiện để xóa!" });
+        if (!canManageEvent(event, req.user)) return res.status(403).json({ message: 'Bạn không có quyền xóa sự kiện này.' });
         const deleted = await Event.findByIdAndDelete(req.params.id);
         if (!deleted) return res.status(404).json({ message: "Không tìm thấy sự kiện để xóa!" });
         req.io.emit('event_deleted', { eventId: req.params.id });

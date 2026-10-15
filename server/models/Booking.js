@@ -5,6 +5,8 @@ const bookingSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   bookingTime: { type: Date, required: true },
   status: { type: String, enum: ['pending', 'confirmed', 'cancelled'], default: 'confirmed' },
+  confirmationCode: { type: String, unique: true, sparse: true, index: true },
+  checkedInAt: { type: Date, default: null },
   reminderSent: { type: Boolean, default: false },
   reminderEmailStatus: { type: String, enum: ['Pending', 'Sent', 'Failed'], default: 'Pending' },
   reminderSmsStatus: { type: String, enum: ['Pending', 'Sent', 'Failed', 'Skipped'], default: 'Pending' }
