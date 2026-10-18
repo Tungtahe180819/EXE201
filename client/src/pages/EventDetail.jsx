@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import io from 'socket.io-client';
 import { QRCodeCanvas } from 'qrcode.react';
 import EventReviewSection from '../components/EventReviewSection';
+import { formatEventPrice } from '../utils/formatPrice';
 
 const socket = io(import.meta.env.VITE_SOCKET_URL || window.location.origin);
 
@@ -15,6 +16,9 @@ export default function EventDetail() {
   const [booking, setBooking] = useState(false);
   const [attendance, setAttendance] = useState({ interested: 0, remaining: null });
   const [registered, setRegistered] = useState(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [relatedEvents, setRelatedEvents] = useState([]);
+  const navigate = useNavigate();
 
   const role = localStorage.getItem("role");
   const isAdmin = role === "admin_master" || role === "admin_support";
@@ -27,13 +31,19 @@ export default function EventDetail() {
       try {
         const res = await axios.get(`/api/events/${id}`);
         setEvent(res.data);
+        axios.get('/api/events').then(({ data }) => {
+          const allEvents = data.events || data;
+          setRelatedEvents(allEvents.filter(item => String(item._id) !== String(id) && item.category === res.data.category).slice(0, 3));
+        }).catch(() => undefined);
         try {
           const summary = await axios.get(`/api/bookings/event/${id}/summary`);
           setAttendance(summary.data);
         } catch { /* Event detail remains usable if availability summary is temporarily unavailable. */ }
         if (localStorage.getItem('token')) {
-          const mine = await axios.get('/api/bookings/mine', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
-          setRegistered(mine.data.find(item => item.eventId?._id === id && item.status !== 'cancelled') || null);
+          const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+          const [mine, favorites] = await Promise.allSettled([axios.get('/api/bookings/mine', { headers }), axios.get('/api/user/favorites', { headers })]);
+          if (mine.status === 'fulfilled') setRegistered(mine.value.data.find(item => item.eventId?._id === id && item.status !== 'cancelled') || null);
+          if (favorites.status === 'fulfilled') setIsFavorite(favorites.value.data.some(item => String(item._id) === String(id)));
         }
       } catch (err) {
         toast.error("Không tìm thấy sự kiện");
@@ -106,6 +116,15 @@ export default function EventDetail() {
     }
   };
 
+  const toggleFavorite = async () => {
+    if (!token) { toast.error('Vui lòng đăng nhập để lưu sự kiện quan tâm.'); navigate('/login'); return; }
+    try {
+      const { data } = await axios.put(`/api/user/favorites/${event._id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setIsFavorite(data.isFavorite);
+      toast.success(data.message);
+    } catch (error) { toast.error(error.response?.data?.message || 'Không thể lưu sự kiện.'); }
+  };
+
   if (loading) return <div className="p-20 text-center text-slate-500">Đang tải thông tin...</div>;
   if (!event) return <div className="p-20 text-center text-red-500 font-bold">Sự kiện không tồn tại.</div>;
 
@@ -132,10 +151,17 @@ export default function EventDetail() {
 
       <h1 className="text-3xl md:text-4xl font-black mb-4">{event.name || event.title}</h1>
       <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">{event.description}</p>
+
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2"><span className="rounded-full bg-indigo-100 px-3 py-1 text-sm font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-200">{event.category}</span><span className={`rounded-full px-3 py-1 text-sm font-black ${Number(event.price) === 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200'}`}>{formatEventPrice(event.price)}</span></div>
+        {!canManageEvent && <button onClick={toggleFavorite} className={`rounded-xl border px-4 py-2 font-bold ${isFavorite ? 'border-rose-300 bg-rose-50 text-rose-600 dark:bg-rose-950/40' : 'border-slate-300 dark:border-slate-700'}`}>{isFavorite ? '♥ Đang quan tâm' : '♡ Quan tâm sự kiện'}</button>}
+      </div>
       
       <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl mb-6 text-sm space-y-2">
         <p>🕒 <strong>Bắt đầu:</strong> {event.startTime || event.startDate ? new Date(event.startTime || event.startDate).toLocaleString('vi-VN') : 'Đang cập nhật'}</p>
         <p>🕒 <strong>Kết thúc:</strong> {event.endDate ? new Date(event.endDate).toLocaleString('vi-VN') : 'Đang cập nhật'}</p>
+        <p>🎟️ <strong>Số chỗ:</strong> {remaining} / {event.totalSlots || 100} còn trống</p>
+        <p>💳 <strong>Giá vé:</strong> {formatEventPrice(event.price)}{Number(event.price) > 0 ? ' / vé' : ''}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 font-semibold">
@@ -180,6 +206,15 @@ export default function EventDetail() {
           {booking ? 'Đang xác nhận...' : registered ? 'Đã xác nhận tham gia' : 'Xác nhận tham gia'}
         </button>
       )}
+
+      <aside className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+        <strong>Hủy vé / hoàn tiền?</strong> Gửi yêu cầu tại <a href="/help" className="font-bold underline">Trung tâm hỗ trợ</a> và ghi mã đơn hoặc mã vé. Yêu cầu sẽ được nhân viên xem xét; hệ thống không tự động hoàn tiền khi gửi biểu mẫu.
+      </aside>
+
+      {relatedEvents.length > 0 && <section className="mb-8 border-t border-slate-200 pt-6 dark:border-slate-700">
+        <h2 className="mb-4 text-xl font-black">Sự kiện cùng thể loại</h2>
+        <div className="grid gap-4 sm:grid-cols-3">{relatedEvents.map(item => <a key={item._id} href={`/events/${item._id}`} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">{(item.imageUrl || item.image) && <img src={item.imageUrl || item.image} alt="" className="h-32 w-full object-cover" />}<div className="p-3"><p className="line-clamp-2 font-bold">{item.title}</p><p className="mt-1 text-sm text-indigo-600">{formatEventPrice(item.price)}</p><p className="text-xs text-slate-500">{new Date(item.startDate).toLocaleDateString('vi-VN')}</p></div></a>)}</div>
+      </section>}
 
       <EventReviewSection eventId={event._id} />
     </div>

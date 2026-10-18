@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 
 export default function ContactSurveyModal() {
-  const [form, setForm] = useState({ name: '', email: '', feedback: '', rating: '5' });
+  const [form, setForm] = useState({ name: '', email: '', feedback: '', rating: '5', type: 'suggestion' });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,8 +25,8 @@ export default function ContactSurveyModal() {
 
   return (
     <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 max-w-xl mx-auto my-10">
-      <h3 className="text-2xl font-black mb-2">Khảo Sát & Góp Ý Trải Nghiệm</h3>
-      <p className="text-slate-500 text-sm mb-6">Hãy chia sẻ ý kiến để giúp Eventverse cải thiện chất lượng dịch vụ tốt hơn.</p>
+      <h3 className="text-2xl font-black mb-2">Liên hệ hỗ trợ Eventverse</h3>
+      <p className="text-slate-500 text-sm mb-6">Gửi góp ý, khiếu nại hoặc yêu cầu liên quan đến hủy/hoàn vé tại đây. Yêu cầu được tiếp nhận để nhân viên xem xét; việc gửi biểu mẫu chưa đồng nghĩa yêu cầu hoàn tiền đã được duyệt. Hãy ghi mã đơn/mã vé và chúng tôi sẽ phản hồi qua email.</p>
 
       {error && <div className="mb-4 rounded-xl bg-rose-100 p-3 text-sm font-semibold text-rose-600">{error}</div>}
       {submitted ? (
@@ -35,6 +35,15 @@ export default function ContactSurveyModal() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold mb-1">Loại yêu cầu</label>
+            <select className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
+              <option value="suggestion">Góp ý</option>
+              <option value="complaint">Khiếu nại</option>
+              <option value="refund">Yêu cầu hoàn tiền</option>
+              <option value="cancellation">Yêu cầu hủy vé/tham gia</option>
+            </select>
+          </div>
           <div>
             <label className="block text-sm font-bold mb-1">Họ và tên</label>
             <input 
@@ -58,7 +67,7 @@ export default function ContactSurveyModal() {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold mb-1">Đánh giá mức độ hài lòng</label>
+            <label className="block text-sm font-bold mb-1">Đánh giá trải nghiệm</label>
             <select 
               className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-indigo-600"
               value={form.rating}
@@ -72,12 +81,12 @@ export default function ContactSurveyModal() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-bold mb-1">Ý kiến đóng góp / Nội dung liên hệ</label>
+            <label className="block text-sm font-bold mb-1">Nội dung yêu cầu</label>
             <textarea 
               rows="4" 
               required
               className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-indigo-600"
-              placeholder="Nhập nội dung bạn muốn gửi cho chúng tôi..."
+              placeholder="Với yêu cầu hủy/hoàn, vui lòng ghi mã đơn hoặc mã vé và lý do..."
               value={form.feedback}
               onChange={e => setForm({...form, feedback: e.target.value})}
             ></textarea>

@@ -22,6 +22,8 @@ const userSchema = new mongoose.Schema({
   vipSource: { type: String, enum: ['manual', 'payment', null], default: null },
   organizerStartedAt: { type: Date, default: null },
   organizerExpiresAt: { type: Date, default: null },
+  chatbotTrialUses: { type: Number, default: 0, min: 0 },
+  favoriteEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
   status: { type: String, enum: ['Active', 'Banned', 'Inactive'], default: 'Active' },
   resetPasswordToken: { type: String, select: false },
   resetPasswordExpires: { type: Date, select: false },

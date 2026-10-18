@@ -8,14 +8,14 @@ export default function Navbar({ role, setRole, theme, toggleTheme, organizerAct
   const navigate = useNavigate();
   const { lang } = useLanguage();
   const t = lang === 'en' ? {
-    search: 'Search events, workshops, music, art...', home: 'Home', calendar: 'Calendar', myParticipation: 'My events', feedback: 'Feedback',
+    search: 'Search events, workshops, music, art...', home: 'Home', calendar: 'My calendar', myParticipation: 'Participation journal', feedback: 'Feedback',
     dashboard: 'Dashboard', manage: 'Manage events', create: '+ Create event', cart: 'Cart', tickets: 'My tickets',
-    profile: 'Profile 👤', logout: 'Log out', login: 'Log in', register: 'Sign up',
+    profile: 'Profile 👤', logout: 'Log out', login: 'Log in', register: 'Sign up', help: 'Help', participation: 'Participation journal',
     lightTheme: 'Switch to light mode', darkTheme: 'Switch to dark mode'
   } : {
-    search: 'Tìm kiếm sự kiện, hội thảo, âm nhạc, nghệ thuật...', home: 'Trang chủ', calendar: 'Lịch sự kiện', myParticipation: 'Lịch của tôi', feedback: 'Góp ý',
+    search: 'Tìm kiếm sự kiện, hội thảo, âm nhạc, nghệ thuật...', home: 'Trang chủ', calendar: 'Lịch của tôi', myParticipation: 'Nhật ký tham gia', feedback: 'Góp ý',
     dashboard: 'Dashboard', manage: 'Quản lý sự kiện', create: '+ Tạo sự kiện', cart: 'Giỏ hàng', tickets: 'Vé của tôi',
-    profile: 'Hồ Sơ 👤', logout: 'Đăng Xuất', login: 'Đăng Nhập', register: 'Đăng Ký',
+    profile: 'Hồ Sơ 👤', logout: 'Đăng Xuất', login: 'Đăng Nhập', register: 'Đăng Ký', help: 'Hỗ trợ', participation: 'Nhật ký tham gia',
     lightTheme: 'Chuyển sang giao diện sáng', darkTheme: 'Chuyển sang giao diện tối'
   };
 
@@ -44,7 +44,7 @@ export default function Navbar({ role, setRole, theme, toggleTheme, organizerAct
         {/* Logo hệ thống */}
         <Link to="/" aria-label="Eventverse - Trang chủ" className="shrink-0">
           <img
-            src="/eventverse-logo.png"
+            src={theme === 'dark' ? '/eventverse-logo-transparent.png' : '/eventverse-logo-light.png'}
             alt="Eventverse"
             className="h-14 w-40 rounded-md object-cover object-center"
           />
@@ -66,6 +66,7 @@ export default function Navbar({ role, setRole, theme, toggleTheme, organizerAct
         <div className="flex items-center gap-4">
           <Link to="/" className="font-semibold text-sm hover:text-indigo-600 transition hidden lg:block">{t.home}</Link>
           <Link to="/calendar" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.calendar}</Link>
+          <Link to="/help" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.help}</Link>
           {(role === 'admin_master' || role === 'admin_support') ? (
             <Link to="/admin/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">Nhận góp ý</Link>
           ) : (
@@ -91,7 +92,7 @@ export default function Navbar({ role, setRole, theme, toggleTheme, organizerAct
           {(role === 'user' || role === 'user_vip') && (
             <>
               {role === 'user_vip' && <span className="hidden rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700 xl:inline">👑 VIP</span>}
-              <Link to="/my-participations" className="font-semibold text-sm hover:text-indigo-600 transition">{t.myParticipation} · Nhật ký tham gia</Link>
+          <Link to="/my-participations" className="font-semibold text-sm hover:text-indigo-600 transition">{t.myParticipation}</Link>
             </>
           )}
           {role ? (

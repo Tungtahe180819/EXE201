@@ -8,15 +8,16 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   try {
     const { name, email, feedback } = req.body;
+    const type = String(req.body.type || 'suggestion');
     const rating = Number(req.body.rating);
-    if (!name || !email || !feedback || !Number.isInteger(rating) || rating < 1 || rating > 5) return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin khảo sát.' });
+    if (!name || !email || !feedback || !['suggestion', 'complaint', 'refund', 'cancellation'].includes(type) || !Number.isInteger(rating) || rating < 1 || rating > 5) return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin liên hệ.' });
     let userId;
     const token = req.headers.authorization?.split(' ')[1];
     if (token) {
       try { userId = jwt.verify(token, process.env.JWT_SECRET).id; } catch { userId = undefined; }
     }
-    await Feedback.create({ userId, name, email, rating, feedback });
-    return res.status(201).json({ message: 'Cảm ơn bạn! Ý kiến đã được ghi nhận.' });
+    await Feedback.create({ userId, name, email, rating, feedback, type });
+    return res.status(201).json({ message: 'Đã gửi yêu cầu. Đội ngũ Eventverse sẽ kiểm tra và phản hồi qua email bạn đã cung cấp.' });
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }

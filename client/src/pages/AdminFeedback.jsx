@@ -3,6 +3,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const statusLabels = { new: 'Mới', reviewed: 'Đã xem', resolved: 'Đã xử lý' };
+const typeLabels = { suggestion: 'Góp ý', complaint: 'Khiếu nại', refund: 'Hoàn tiền', cancellation: 'Hủy vé/tham gia' };
 
 export default function AdminFeedback() {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -44,7 +45,7 @@ export default function AdminFeedback() {
               <div className="flex flex-col justify-between gap-3 sm:flex-row">
                 <div>
                   <h2 className="font-black">{item.name} · {'⭐'.repeat(item.rating)}</h2>
-                  <p className="text-sm text-slate-500">{item.email} · {new Date(item.createdAt).toLocaleString('vi-VN')}</p>
+              <p className="text-sm text-slate-500">{typeLabels[item.type] || typeLabels.suggestion} · {item.email} · {new Date(item.createdAt).toLocaleString('vi-VN')}</p>
                 </div>
                 <select value={item.status} onChange={event => updateStatus(item._id, event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 font-bold dark:border-slate-700 dark:bg-slate-800">
                   {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}

@@ -57,21 +57,18 @@ export default function Footer() {
               <span>📍</span> <span>{t.address}</span>
             </li>
           </ul>
-          <a href="/feedback" className="inline-block text-sm font-bold text-indigo-400 hover:text-indigo-300">Gửi liên hệ và khảo sát →</a>
+          <div className="flex flex-wrap gap-4 text-sm font-bold text-indigo-400">
+            <a href="/help" className="hover:text-indigo-300">Trung tâm hỗ trợ →</a>
+            <a href="/feedback" className="hover:text-indigo-300">Gửi góp ý / khiếu nại →</a>
+          </div>
         </div>
 
-        {/* Cột 3: Mạng xã hội (Facebook, TikTok, Instagram) */}
+        {/* Kênh mạng xã hội hiện tại */}
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-white">{t.socialTitle}</h3>
           <div className="flex gap-3">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-indigo-600 flex items-center justify-center text-white transition shadow-md">
+            <a href="http://facebook.com/profile.php?id=61595339489092" target="_blank" rel="noopener noreferrer" aria-label="Facebook Eventverse" className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-indigo-600 flex items-center justify-center text-white transition shadow-md">
               📘
-            </a>
-            <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-indigo-600 flex items-center justify-center text-white transition shadow-md">
-              🎵
-            </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-indigo-600 flex items-center justify-center text-white transition shadow-md">
-              📸
             </a>
           </div>
         </div>

@@ -239,6 +239,16 @@ const chatbotSupport = async (req, res) => {
     try {
       const events = await findRelevantEvents(filters);
       const pastEvents = events.length ? [] : await findMatchingPastEvents(filters);
+      const ai = getAI();
+      if (!events.length && ai) {
+        try {
+          const prompt = `Bạn là trợ lý gợi ý hoạt động và sự kiện bằng tiếng Việt. Người dùng hỏi: ${userQuery}\nDữ liệu Eventverse hiện không có sự kiện sắp tới còn vé khớp chính xác. Hãy nói rõ điều này trước. Sau đó gợi ý tối đa 3 hướng tìm kiếm/loại hoạt động bên ngoài Eventverse phù hợp với địa điểm, sở thích và mức giá nếu có. Không được khẳng định một sự kiện cụ thể đang diễn ra, ngày giờ, giá vé hay còn vé nếu không có nguồn xác minh. Gắn nhãn rõ đây là gợi ý tham khảo chưa được Eventverse xác minh và khuyên kiểm tra trang của ban tổ chức.`;
+          const aiResponse = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+          return res.status(200).json({ success: true, source: 'general_ai', reply: aiResponse.text || localEventReply(events, pastEvents, filters), remainingUses: req.chatbotTrialRemaining });
+        } catch (error) {
+          console.error('Gemini gợi ý sự kiện thất bại:', error.message);
+        }
+      }
       return res.status(200).json({
         success: true,
         source: 'eventverse_database',
@@ -248,7 +258,8 @@ const chatbotSupport = async (req, res) => {
           maxPrice: filters.budget?.amount ?? null,
           freeOnly: filters.wantsFree
         },
-        reply: localEventReply(events, pastEvents, filters)
+        reply: localEventReply(events, pastEvents, filters),
+        remainingUses: req.chatbotTrialRemaining
       });
     } catch (error) {
       console.error('Không thể tìm sự kiện cho chatbot:', error.message);
@@ -262,7 +273,7 @@ const chatbotSupport = async (req, res) => {
       return res.status(503).json({ success: false, message: 'Trợ lý AI chưa được cấu hình. Bạn vẫn có thể hỏi tôi để tìm sự kiện theo giá, thể loại hoặc địa điểm.' });
     }
 
-    const prompt = `Bạn là trợ lý hỗ trợ khách hàng của Eventverse. Trả lời ngắn gọn, thân thiện bằng tiếng Việt. Chỉ trả lời về cách dùng website và thông tin Eventverse được nêu dưới đây. Không bịa chính sách, giao dịch, sự kiện, giá vé, thời gian hoặc địa điểm. Nếu người dùng hỏi tìm/gợi ý sự kiện, hãy nói họ có thể nêu thể loại, thành phố và mức giá; việc tìm sự kiện do hệ thống dữ liệu thực hiện. Nếu không biết câu trả lời, hãy nói rõ và hướng người dùng tới mục Góp ý hoặc liên hệ hỗ trợ.\nCâu hỏi: ${userQuery}`;
+    const prompt = `Bạn là trợ lý Eventverse, trả lời tự nhiên, hữu ích và chi tiết bằng tiếng Việt. Bạn có thể tư vấn chung về ý tưởng đi chơi, loại hình sự kiện, cách lên kế hoạch và cách sử dụng website. Không được bịa trạng thái đơn hàng, chính sách hoàn tiền, nội dung website hoặc khẳng định sự kiện cụ thể đang diễn ra/còn vé khi chưa có dữ liệu xác minh. Nếu gợi ý hoạt động không có trong dữ liệu Eventverse, nói rõ đó chỉ là gợi ý tham khảo bên ngoài, chưa được xác minh lịch/giá, và khuyên kiểm tra trang của ban tổ chức. Với yêu cầu hỗ trợ giao dịch, hướng dẫn người dùng vào Trung tâm hỗ trợ hoặc biểu mẫu Góp ý/Khiếu nại.\nCâu hỏi: ${userQuery}`;
     
     const aiResponse = await ai.models.generateContent({ 
       model: 'gemini-2.5-flash', 
@@ -271,7 +282,7 @@ const chatbotSupport = async (req, res) => {
 
     const replyText = aiResponse.text || 'Xin lỗi, hiện tại trợ lý ảo chưa thể phản hồi.';
     
-    res.status(200).json({ success: true, reply: replyText });
+    res.status(200).json({ success: true, reply: replyText, remainingUses: req.chatbotTrialRemaining });
   } catch (error) {
     console.error('Gemini chatbot thất bại:', error.message);
     return res.status(503).json({ success: false, message: 'Trợ lý AI chưa thể phản hồi lúc này. Vui lòng thử lại sau.' });

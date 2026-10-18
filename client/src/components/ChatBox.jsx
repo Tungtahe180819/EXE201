@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import VipUpgradeModal from './VipUpgradeModal';
+import { useNavigate } from 'react-router-dom';
 
 export default function ChatBox({ role }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,8 +12,29 @@ export default function ChatBox({ role }) {
   const [loading, setLoading] = useState(false);
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
   const isVip = role === 'user_vip';
+  const navigate = useNavigate();
+  const [remainingUses, setRemainingUses] = useState(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      return Math.max(0, 5 - Number(user.chatbotTrialUses || 0));
+    } catch { return 5; }
+  });
+
+  useEffect(() => {
+    if (role !== 'user') return undefined;
+    axios.get('/api/user/profile', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+      .then(({ data }) => setRemainingUses(Math.max(0, 5 - Number(data.chatbotTrialUses || 0))))
+      .catch(() => undefined);
+    return undefined;
+  }, [role]);
 
   if (role === 'admin_master' || role === 'admin_support') return null;
+
+  const openChat = () => {
+    if (!role) return navigate('/login');
+    if (isVip || remainingUses > 0) return setIsOpen(true);
+    setIsVipModalOpen(true);
+  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -29,9 +51,14 @@ export default function ChatBox({ role }) {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const botReply = res.data.reply || res.data.message || "Xin lỗi, tôi chưa hiểu rõ câu hỏi của bạn.";
+      if (Number.isFinite(res.data.remainingUses)) setRemainingUses(res.data.remainingUses);
       setMessages(prev => [...prev, { sender: 'bot', text: botReply }]);
     } catch (err) {
       console.error('Không thể gọi trợ lý AI:', err);
+      if (err.response?.data?.code === 'VIP_REQUIRED') {
+        setRemainingUses(0);
+        setIsVipModalOpen(true);
+      }
       setMessages(prev => [...prev, {
         sender: 'bot',
         text: err.response?.data?.message || 'Hệ thống AI đang bận, vui lòng thử lại sau giây lát!'
@@ -47,12 +74,13 @@ export default function ChatBox({ role }) {
       {/* Nút bật/tắt khung chat */}
       {!isOpen && (
         <button 
-          onClick={() => isVip ? setIsOpen(true) : setIsVipModalOpen(true)}
+          onClick={openChat}
           className="relative w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl transition hover:scale-110"
-          aria-label={isVip ? 'Mở Chatbot AI' : 'Nâng cấp VIP để dùng Chatbot AI'}
+          aria-label={isVip || remainingUses > 0 ? 'Mở Chatbot AI' : 'Nâng cấp VIP để dùng Chatbot AI'}
         >
           💬
-          {!isVip && <span className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full bg-amber-400 text-xs shadow">🔒</span>}
+          {role === 'user' && remainingUses > 0 && <span className="absolute -right-2 -top-2 rounded-full bg-amber-400 px-2 py-1 text-[10px] font-black text-slate-950 shadow">{remainingUses} lượt</span>}
+          {!role && <span className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full bg-amber-400 text-xs shadow">🔒</span>}
         </button>
       )}
 
@@ -65,7 +93,7 @@ export default function ChatBox({ role }) {
               <span className="text-xl">🤖</span>
               <div>
                 <h4 className="font-bold text-sm">Trợ Lý AI Eventverse</h4>
-                <span className="text-[10px] text-indigo-200">Sẵn sàng hỗ trợ 24/7</span>
+                <span className="text-[10px] text-indigo-200">{isVip ? 'VIP · sử dụng không giới hạn' : `Còn ${remainingUses} lượt dùng thử miễn phí`}</span>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-white hover:text-slate-200 font-bold text-lg">&times;</button>

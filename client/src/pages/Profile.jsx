@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { ORGANIZER_PLAN_ID, ORGANIZER_PLAN_ITEM } from '../utils/organizerPlan';
+import { VIP_PLAN_ID, VIP_PLAN_ITEM } from '../utils/vipPlan';
 
 export default function Profile() {
   const [profile, setProfile] = useState({ name: '', email: '', phone: '', avatar: '', bio: '', history: [] });
@@ -15,6 +16,14 @@ export default function Profile() {
     let cart;
     try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch { cart = []; }
     if (!cart.some(item => item._id === ORGANIZER_PLAN_ID)) cart.push(ORGANIZER_PLAN_ITEM);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    navigate('/cart');
+  };
+
+  const addVipPlanToCart = () => {
+    let cart;
+    try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch { cart = []; }
+    if (!cart.some(item => item._id === VIP_PLAN_ID)) cart.push(VIP_PLAN_ITEM);
     localStorage.setItem('cart', JSON.stringify(cart));
     navigate('/cart');
   };
@@ -84,7 +93,10 @@ export default function Profile() {
               </span>
             </div>
             {profile.role !== 'user_vip' && (
-              <p className="mt-3 text-xs font-semibold">Thanh toán bằng VietQR để hệ thống tự động kích hoạt VIP. Admin Master vẫn có thể hỗ trợ kích hoạt thủ công khi cần.</p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-semibold">Thanh toán bằng VietQR; payOS tự kích hoạt sau khi xác nhận giao dịch.</p>
+                <button onClick={addVipPlanToCart} className="rounded-xl bg-amber-500 px-5 py-3 font-black text-white shadow hover:bg-amber-600">Đăng ký VIP · 250.000đ/năm</button>
+              </div>
             )}
           </section>
         )}

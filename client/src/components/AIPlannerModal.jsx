@@ -126,7 +126,8 @@ export default function AIPlannerModal({ isOpen, onClose }) {
               </button>
               <button
                 onClick={() => {
-                  toast.success("Đã đồng bộ lịch trình vào tài khoản của bạn!");
+                  toast.success("Lịch trình AI đã được lưu vào tài khoản của bạn!");
+                  window.dispatchEvent(new CustomEvent('itinerary-saved'));
                   onClose();
                 }}
                 className="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-2xl shadow-md"

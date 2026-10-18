@@ -30,6 +30,7 @@ import OrganizerEvents from './OrganizerEvents';
 import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
 import ContactSurveyModal from '../components/ContactSurveyModal';
+import HelpCenter from './HelpCenter';
 import { LanguageContext } from '../context/LanguageContext';
 
 function App() {
@@ -87,6 +88,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/feedback" element={<ContactSurveyModal />} />
+            <Route path="/help" element={<HelpCenter />} />
 
             <Route path="/events" element={<Events />} />
             <Route path="/events/:id" element={<EventDetail />} />

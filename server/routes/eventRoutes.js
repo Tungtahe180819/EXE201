@@ -40,7 +40,7 @@ function canManageEvent(event, user) {
 }
 
 // --- 1. ROUTES AI ---
-router.post('/chat', verifyToken, requireVip, chatbotSupport);
+router.post('/chat', verifyToken, require('../middleware/chatbotAccess'), chatbotSupport);
 
 // --- 2. ROUTES TÌM KIẾM VÀ BANNER NỔI BẬT (Đặt TRƯỚC /:id) ---
 router.get('/search', async (req, res) => {
