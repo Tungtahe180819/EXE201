@@ -21,6 +21,7 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const { syncCatalogEvents } = require('./services/catalogEventSync');
 
 const app = express();
 const PORT = process.env.PORT || 9999;
@@ -44,8 +45,14 @@ app.use((req, res, next) => {
 
 // Kết nối MongoDB (sử dụng EV_DATA từ .env)
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
+    .then(async () => {
         console.log('✅ Kết nối MongoDB (EV_DATA) thành công!');
+        try {
+            const syncedCount = await syncCatalogEvents();
+            console.log(`✅ Đã đồng bộ ${syncedCount} sự kiện từ catalog.`);
+        } catch (err) {
+            console.error('⚠️ Không thể đồng bộ sự kiện catalog:', err.message);
+        }
         require('./services/reminderService').startReminderService();
         server.listen(PORT, () => {
             console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);

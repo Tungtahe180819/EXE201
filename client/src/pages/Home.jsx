@@ -4,6 +4,7 @@ import axios from 'axios';
 import AIPlannerModal from '../components/AIPlannerModal';
 import VipUpgradeModal from '../components/VipUpgradeModal';
 import FilterSection from '../components/FilterSection';
+import EventPagination from '../components/EventPagination';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80';
 
@@ -14,6 +15,7 @@ export default function Home() {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
   const role = localStorage.getItem('role');
 
@@ -51,6 +53,8 @@ export default function Home() {
   const filteredEvents = selectedCategory === 'all'
     ? events
     : events.filter(event => event.category === selectedCategory);
+  const pageSize = 9;
+  const paginatedEvents = filteredEvents.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const featuredEvents = events.filter(event => event.image || event.imageUrl).slice(0, 5);
 
   return (
@@ -150,10 +154,16 @@ export default function Home() {
 
       {/* --- DANH SÁCH TOÀN BỘ SỰ KIỆN --- */}
       <div className="max-w-7xl mx-auto px-4 mt-16">
-        <FilterSection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
+        <FilterSection
+          selectedCategory={selectedCategory}
+          setSelectedCategory={category => {
+            setSelectedCategory(category);
+            setCurrentPage(1);
+          }}
+        />
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-black border-l-8 border-indigo-600 pl-4">Tất Cả Sự Kiện</h2>
-          <span className="text-sm text-slate-500 dark:text-slate-400">Đang hiển thị {filteredEvents.length} sự kiện</span>
+          <span className="text-sm text-slate-500 dark:text-slate-400">Đang hiển thị {paginatedEvents.length}/{filteredEvents.length} sự kiện</span>
         </div>
         
         {loading ? (
@@ -161,8 +171,9 @@ export default function Home() {
         ) : filteredEvents.length === 0 ? (
           <p className="text-center text-slate-500 py-12">Không có sự kiện phù hợp với bộ lọc.</p>
         ) : (
+          <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {filteredEvents.map(ev => (
+            {paginatedEvents.map(ev => (
               <div 
                 key={ev._id} 
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col justify-between cursor-pointer hover:scale-[1.02] transition duration-300"
@@ -205,6 +216,13 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <EventPagination
+            currentPage={currentPage}
+            totalItems={filteredEvents.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+          />
+          </>
         )}
       </div>
 

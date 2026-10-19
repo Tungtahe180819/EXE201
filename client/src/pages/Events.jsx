@@ -2,17 +2,22 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import FilterSection from '../components/FilterSection';
+import EventPagination from '../components/EventPagination';
 
 export default function Events() {
   const [searchParams] = useSearchParams();
   const keyword = searchParams.get('search') || '';
   const [events, setEvents] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 9;
+  const paginatedEvents = events.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   
   // Khởi tạo trạng thái loading là true ngay từ đầu để tránh gọi setState đồng bộ trong useEffect
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setCurrentPage(1);
     // Gọi API tìm kiếm và lọc danh mục từ Backend
     axios.get('/api/events/search', {
       params: { keyword, category: selectedCategory }
@@ -35,7 +40,13 @@ export default function Events() {
       <p className="text-slate-500 mb-6">Tìm thấy tổng cộng {events.length} sự kiện phù hợp.</p>
 
       {/* Thanh bộ lọc phân mảng */}
-      <FilterSection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
+      <FilterSection
+        selectedCategory={selectedCategory}
+        setSelectedCategory={category => {
+          setSelectedCategory(category);
+          setCurrentPage(1);
+        }}
+      />
 
       {/* Danh sách sự kiện trả về */}
       {loading ? (
@@ -46,8 +57,9 @@ export default function Events() {
           <Link to="/" className="mt-4 inline-block bg-indigo-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-md">Quay về trang chủ</Link>
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          {events.map(event => (
+          {paginatedEvents.map(event => (
             <Link key={event._id} to={`/events/${event._id}`} className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-800 hover:scale-[1.02] transition">
               <img src={event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80'} alt={event.title} className="w-full h-48 object-cover" />
               <div className="p-6">
@@ -59,6 +71,13 @@ export default function Events() {
             </Link>
           ))}
         </div>
+        <EventPagination
+          currentPage={currentPage}
+          totalItems={events.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+        />
+        </>
       )}
     </div>
   );
