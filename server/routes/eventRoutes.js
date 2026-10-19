@@ -222,7 +222,7 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', verifyToken, async (req, res) => {
     try {
-        const allowedFields = ['title', 'category', 'description', 'startDate', 'endDate', 'location', 'price', 'stock', 'totalSlots', 'image', 'recurrence', 'timezone'];
+        const allowedFields = ['title', 'category', 'description', 'startDate', 'endDate', 'location', 'price', 'stock', 'totalSlots', 'image', 'sourceUrl', 'recurrence', 'timezone'];
         const changes = Object.fromEntries(
             Object.entries(req.body).filter(([key]) => allowedFields.includes(key))
         );

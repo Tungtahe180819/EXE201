@@ -13,6 +13,7 @@ const eventSchema = new mongoose.Schema({
   price: { type: Number, required: true, default: 0 },
   stock: { type: Number, required: true, default: 100 },
   image: { type: String, required: true },
+  sourceUrl: { type: String, trim: true, default: '' },
   totalSlots: { type: Number, default: 100 },
   bookedSlots: { type: Number, default: 0 },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

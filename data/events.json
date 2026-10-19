@@ -154,5 +154,49 @@
     "price": 250000,
     "stock": 250,
     "image": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "title": "Festival Bảo tồn và Phát triển làng nghề toàn cầu",
+    "category": "Văn hóa",
+    "description": "Festival Bảo tồn và Phát triển Làng nghề Toàn cầu lần thứ nhất là sự kiện văn hóa - kinh tế lớn do UBND Thành phố Hà Nội phối hợp với Bộ Nông nghiệp và Môi trường tổ chức từ ngày 12 đến 16/11/2026 tại Hoàng thành Thăng Long. Quy tụ khoảng 200 đại biểu quốc tế đến từ 40–50 quốc gia, lễ hội có không gian trưng bày 10.000 m² cùng chuỗi hoạt động trải nghiệm tại các làng nghề như Bát Tràng, Vạn Phúc. Sự kiện nhằm tôn vinh nghệ nhân, bảo tồn di sản truyền thống và thúc đẩy kết nối du lịch, xuất khẩu.",
+    "location": {
+      "address": "Khu di tích lịch sử Hoàng thành Thăng Long",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-11-14T19:00:00+07:00",
+    "price": 0,
+    "stock": 100,
+    "image": "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=1200&q=80",
+    "sourceUrl": "https://nguoihanoi.vn/festival-bao-ton-phat-trien-lang-nghe-toan-cau-ket-noi-de-phat-huy-gia-tri-van-hoa-102954.html"
+  },
+  {
+    "title": "SEMITRONICS – Triển lãm quốc tế về Điện tử và Điện tử bán dẫn",
+    "category": "Công nghệ",
+    "description": "Triển lãm tập trung vào công nghệ vi mạch, vật liệu bán dẫn, linh kiện điện tử và quy trình sản xuất thiết bị công nghệ cao.",
+    "location": {
+      "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-10-13T09:00:00+07:00",
+    "endDate": "2026-10-15T17:30:00+07:00",
+    "price": 0,
+    "stock": 100,
+    "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80",
+    "sourceUrl": "https://www.semitronicsvietnam.com/"
+  },
+  {
+    "title": "PLASE SHOW 2026 – Triển lãm quốc tế các Thiết bị biểu diễn chuyên nghiệp",
+    "category": "Công nghệ",
+    "description": "Triển lãm chuyên ngành quy tụ các thương hiệu và nhà sản xuất thiết bị âm thanh, ánh sáng sân khấu, công nghệ trình chiếu nghệ thuật; là nơi giao lưu kỹ thuật biểu diễn cho các nhà tổ chức sự kiện, nghệ sĩ và kỹ sư sân khấu.",
+    "location": {
+      "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-10-17T10:00:00+07:00",
+    "endDate": "2026-10-19T20:00:00+07:00",
+    "price": 0,
+    "stock": 100,
+    "image": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80",
+    "sourceUrl": "https://vec.global/about/news/plase-show-ha-noi-2026"
   }
 ]

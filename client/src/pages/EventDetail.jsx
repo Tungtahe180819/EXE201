@@ -151,6 +151,7 @@ export default function EventDetail() {
 
       <h1 className="text-3xl md:text-4xl font-black mb-4">{event.name || event.title}</h1>
       <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">{event.description}</p>
+      {event.sourceUrl && <p className="-mt-3 mb-5 text-sm"><a href={event.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-indigo-600 underline dark:text-indigo-300">Xem nguồn thông tin sự kiện ↗</a></p>}
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2"><span className="rounded-full bg-indigo-100 px-3 py-1 text-sm font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-200">{event.category}</span><span className={`rounded-full px-3 py-1 text-sm font-black ${Number(event.price) === 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200'}`}>{formatEventPrice(event.price)}</span></div>

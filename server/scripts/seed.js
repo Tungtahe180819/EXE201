@@ -58,6 +58,7 @@ async function seedEvents(events) {
           price: Number(source.price) || 0,
           stock: Number(source.stock) || 0,
           image: source.image,
+          sourceUrl: source.sourceUrl || '',
           totalSlots: Number(source.stock) || 0
         },
         $setOnInsert: { bookedSlots: 0 }
