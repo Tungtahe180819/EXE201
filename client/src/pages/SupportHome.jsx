@@ -20,9 +20,12 @@ export default function SupportHome() {
           <p className="text-sm font-bold uppercase tracking-wider text-indigo-600">Admin Support</p>
           <h1 className="text-3xl font-bold">Quản lý sự kiện</h1>
         </div>
-        <Link to="/add" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-xl shadow-md transition">
-          + Tạo sự kiện mới
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link to="/admin/analytics" className="rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white shadow-md transition hover:bg-indigo-700">Phân tích truy cập</Link>
+          <Link to="/add" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-xl shadow-md transition">
+            + Tạo sự kiện mới
+          </Link>
+        </div>
       </div>
       <table className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <thead><tr className="bg-gray-100 text-left dark:bg-slate-800">

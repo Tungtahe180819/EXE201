@@ -62,6 +62,7 @@ export default function AdminDash() {
             <p className="mt-1 text-sm text-slate-500">Theo dõi hoạt động và hiệu quả kinh doanh của Eventverse.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Link to="/admin/analytics" className="rounded-xl bg-indigo-600 px-4 py-2 font-bold text-white shadow-sm">Phân tích truy cập</Link>
             <Link to="/admin/users" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">Người dùng</Link>
             <Link to="/admin/feedback" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">Nhận góp ý</Link>
             <Link to="/admin/events" className="rounded-xl bg-white px-4 py-2 font-bold shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">Sự kiện</Link>

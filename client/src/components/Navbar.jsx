@@ -68,7 +68,10 @@ export default function Navbar({ role, setRole, theme, toggleTheme, organizerAct
           <Link to="/calendar" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.calendar}</Link>
           <Link to="/help" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.help}</Link>
           {(role === 'admin_master' || role === 'admin_support') ? (
-            <Link to="/admin/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">Nhận góp ý</Link>
+            <>
+              <Link to="/admin/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">Nhận góp ý</Link>
+              <Link to="/admin/analytics" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">Phân tích</Link>
+            </>
           ) : (
             <Link to="/feedback" className="font-semibold text-sm hover:text-indigo-600 transition hidden xl:block">{t.feedback}</Link>
           )}
