@@ -32,6 +32,7 @@ import ResetPassword from './ResetPassword';
 import ContactSurveyModal from '../components/ContactSurveyModal';
 import HelpCenter from './HelpCenter';
 import { LanguageContext } from '../context/LanguageContext';
+import AnalyticsTracker from '../components/AnalyticsTracker';
 
 function App() {
   const [role, setRole] = useState(localStorage.getItem("role"));
@@ -76,6 +77,7 @@ function App() {
   return (
     <LanguageContext.Provider value={{ lang, setLang }}>
     <Router>
+      <AnalyticsTracker />
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
         <Toaster position="top-right" toastOptions={{ duration: 4500 }} />
         <Navbar role={role} setRole={setRole} theme={theme} toggleTheme={toggleTheme} organizerActive={organizerActive} />
