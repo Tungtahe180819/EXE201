@@ -22,12 +22,18 @@ async function syncCatalogEvents() {
       sourceUrl: source.sourceUrl || '',
       totalSlots: Number(source.stock) || 0
     };
-    const { image, sourceUrl, ...insertOnlyData } = eventData;
+    const { location, startDate, endDate, image, sourceUrl, ...insertOnlyData } = eventData;
 
     await Event.findOneAndUpdate(
       { title: source.title },
       {
-        $set: { image, sourceUrl },
+        $set: {
+          location: source.location,
+          startDate: source.startDate,
+          endDate: source.endDate || source.startDate,
+          image,
+          sourceUrl
+        },
         $setOnInsert: { ...insertOnlyData, bookedSlots: 0 }
       },
       { upsert: true, returnDocument: 'after', runValidators: true }

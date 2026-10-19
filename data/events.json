@@ -194,11 +194,11 @@
       "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh",
       "city": "Hà Nội"
     },
-    "startDate": "2026-10-17T10:00:00+07:00",
-    "endDate": "2026-10-19T20:00:00+07:00",
+    "startDate": "2026-10-17T09:00:00+07:00",
+    "endDate": "2026-10-19T19:00:00+07:00",
     "price": 0,
     "stock": 100,
-    "image": "https://dientuungdung.vn/stores/news_dataimages/2026/102026/14/23/in_social/screenshot-2026-10-14-23264020261014232710.png?randTime=1792374857",
+    "image": "https://dientuungdung.vn/stores/news_dataimages/2026/102026/14/23/screenshot-2026-10-14-23264020261014232710.png?rt=20261014232817",
     "sourceUrl": "https://vec.global/about/news/plase-show-ha-noi-2026",
     "catalogManaged": true
   }
