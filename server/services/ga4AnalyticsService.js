@@ -5,12 +5,20 @@ const GA4_SCOPE = 'https://www.googleapis.com/auth/analytics.readonly';
 let cachedToken = null;
 
 function getCredentials() {
+  if (process.env.GA4_PROPERTY_ID && process.env.GA4_OAUTH_CLIENT_ID && process.env.GA4_OAUTH_CLIENT_SECRET && process.env.GA4_OAUTH_REFRESH_TOKEN) {
+    return {
+      type: 'oauth',
+      clientId: process.env.GA4_OAUTH_CLIENT_ID,
+      clientSecret: process.env.GA4_OAUTH_CLIENT_SECRET,
+      refreshToken: process.env.GA4_OAUTH_REFRESH_TOKEN,
+    };
+  }
   const encoded = process.env.GA4_SERVICE_ACCOUNT_BASE64;
   const raw = process.env.GA4_SERVICE_ACCOUNT_JSON || (encoded ? Buffer.from(encoded, 'base64').toString('utf8') : '');
   if (!raw || !process.env.GA4_PROPERTY_ID) return null;
   try {
     const parsed = JSON.parse(raw);
-    return parsed.client_email && parsed.private_key ? parsed : null;
+    return parsed.client_email && parsed.private_key ? { ...parsed, type: 'service-account' } : null;
   } catch {
     return null;
   }
@@ -22,6 +30,25 @@ function base64Url(value) {
 
 async function getAccessToken(credentials) {
   if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) return cachedToken.value;
+
+  if (credentials.type === 'oauth') {
+    const response = await fetch(TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        client_id: credentials.clientId,
+        client_secret: credentials.clientSecret,
+        refresh_token: credentials.refreshToken,
+      }),
+    });
+    const payload = await response.json();
+    if (!response.ok || !payload.access_token) {
+      throw new Error(payload.error_description || payload.error || 'Không thể làm mới quyền truy cập Google Analytics.');
+    }
+    cachedToken = { value: payload.access_token, expiresAt: Date.now() + (payload.expires_in || 3600) * 1000 };
+    return cachedToken.value;
+  }
 
   const issuedAt = Math.floor(Date.now() / 1000);
   const unsigned = `${base64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))}.${base64Url(JSON.stringify({
@@ -70,7 +97,7 @@ function metricValue(row, index) {
 async function getAnalyticsReport() {
   const credentials = getCredentials();
   if (!credentials) {
-    const error = new Error('Chưa cấu hình GA4_PROPERTY_ID và service account trên server.');
+    const error = new Error('Chưa cấu hình GA4_PROPERTY_ID và OAuth client credentials trên server.');
     error.code = 'GA4_NOT_CONFIGURED';
     throw error;
   }

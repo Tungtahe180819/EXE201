@@ -63,8 +63,8 @@ export default function AdminAnalytics() {
         {configMissing ? (
           <section className="rounded-2xl border border-amber-300 bg-amber-50 p-6 text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
             <h2 className="text-lg font-black">Cần cấu hình quyền đọc báo cáo GA4</h2>
-            <p className="mt-2 text-sm leading-6">Mã đo lường G-… chỉ gửi dữ liệu vào GA4. Để hiển thị báo cáo ở đây, server cần <code>GA4_PROPERTY_ID</code> và service account JSON được cấp quyền Viewer trên tài sản GA4.</p>
-            <p className="mt-3 text-sm">Sau khi thêm <code>GA4_PROPERTY_ID</code> và <code>GA4_SERVICE_ACCOUNT_BASE64</code> trên Render, tải lại trang này.</p>
+            <p className="mt-2 text-sm leading-6">Mã đo lường G-… chỉ gửi dữ liệu vào GA4. Để hiển thị báo cáo, server cần <code>GA4_PROPERTY_ID</code> cùng OAuth credentials có quyền đọc tài sản GA4.</p>
+            <p className="mt-3 text-sm">Cấu hình <code>GA4_PROPERTY_ID</code>, <code>GA4_OAUTH_CLIENT_ID</code>, <code>GA4_OAUTH_CLIENT_SECRET</code> và <code>GA4_OAUTH_REFRESH_TOKEN</code> trong Render rồi tải lại trang.</p>
           </section>
         ) : loading && !report ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 dark:border-slate-800 dark:bg-slate-900">Đang tải dữ liệu GA4…</div>

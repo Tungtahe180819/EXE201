@@ -8,7 +8,7 @@ async function getAnalytics(req, res) {
       return res.status(503).json({ code: error.code, message: error.message });
     }
     console.error('GA4 report error:', error.message);
-    return res.status(502).json({ message: 'Không tải được báo cáo GA4. Hãy kiểm tra cấu hình và quyền truy cập của service account.' });
+    return res.status(502).json({ message: 'Không tải được báo cáo GA4. Hãy kiểm tra thông tin OAuth và quyền đọc thuộc tính GA4.' });
   }
 }
 
