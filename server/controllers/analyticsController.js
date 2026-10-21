@@ -2,7 +2,7 @@ const { getAnalyticsReport } = require('../services/ga4AnalyticsService');
 
 async function getAnalytics(req, res) {
   try {
-    res.json(await getAnalyticsReport());
+    res.json(await getAnalyticsReport({ mode: req.query.mode, window: req.query.window }));
   } catch (error) {
     if (error.code === 'GA4_NOT_CONFIGURED') {
       return res.status(503).json({ code: error.code, message: error.message });
