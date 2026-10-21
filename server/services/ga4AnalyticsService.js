@@ -75,8 +75,8 @@ async function getAccessToken(credentials) {
   return cachedToken.value;
 }
 
-async function runReport(token, body) {
-  const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${encodeURIComponent(process.env.GA4_PROPERTY_ID)}:runReport`, {
+async function runRealtimeReport(token, body) {
+  const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${encodeURIComponent(process.env.GA4_PROPERTY_ID)}:runRealtimeReport`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -91,7 +91,7 @@ async function runReport(token, body) {
 }
 
 function metricValue(row, index) {
-  return Number(row.metricValues?.[index]?.value || 0);
+  return Number(row?.metricValues?.[index]?.value || 0);
 }
 
 async function getAnalyticsReport() {
@@ -102,49 +102,65 @@ async function getAnalyticsReport() {
     throw error;
   }
   const token = await getAccessToken(credentials);
-  const [summary, daily, pages] = await Promise.all([
-    runReport(token, {
-      dateRanges: [{ startDate: '29daysAgo', endDate: 'today' }],
-      metrics: [{ name: 'activeUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }, { name: 'eventCount' }],
+  const [summary, activity, pages, events] = await Promise.all([
+    runRealtimeReport(token, {
+      metrics: [{ name: 'activeUsers' }, { name: 'screenPageViews' }, { name: 'eventCount' }],
     }),
-    runReport(token, {
-      dateRanges: [{ startDate: '29daysAgo', endDate: 'today' }],
-      dimensions: [{ name: 'date' }],
-      metrics: [{ name: 'activeUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }, { name: 'eventCount' }],
-      orderBys: [{ dimension: { dimensionName: 'date' } }],
+    runRealtimeReport(token, {
+      dimensions: [{ name: 'minutesAgo' }],
+      metrics: [{ name: 'eventCount' }, { name: 'screenPageViews' }],
+      orderBys: [{ dimension: { dimensionName: 'minutesAgo' } }],
+      minuteRanges: [{ startMinutesAgo: 29, endMinutesAgo: 0 }],
       limit: 30,
     }),
-    runReport(token, {
-      dateRanges: [{ startDate: '29daysAgo', endDate: 'today' }],
-      dimensions: [{ name: 'pagePath' }],
+    runRealtimeReport(token, {
+      dimensions: [{ name: 'unifiedScreenName' }],
       metrics: [{ name: 'screenPageViews' }, { name: 'activeUsers' }],
       orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
       limit: 10,
     }),
+    runRealtimeReport(token, {
+      dimensions: [{ name: 'eventName' }],
+      metrics: [{ name: 'eventCount' }],
+      orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
+      limit: 10,
+    }),
   ]);
 
-  const summaryRow = summary.rows?.[0];
+  const summaryRow = summary.totals?.[0] || summary.rows?.[0];
   const totals = summaryRow ? {
     users: metricValue(summaryRow, 0),
-    sessions: metricValue(summaryRow, 1),
-    pageViews: metricValue(summaryRow, 2),
-    events: metricValue(summaryRow, 3),
-  } : { users: 0, sessions: 0, pageViews: 0, events: 0 };
+    pageViews: metricValue(summaryRow, 1),
+    events: metricValue(summaryRow, 2),
+  } : { users: 0, pageViews: 0, events: 0 };
+
+  const minuteRows = new Map((activity.rows || []).map(row => [
+    Number(row.dimensionValues?.[0]?.value || 0),
+    row,
+  ]));
 
   return {
     totals,
-    daily: (daily.rows || []).map(row => ({
-      date: row.dimensionValues?.[0]?.value || '',
-      users: metricValue(row, 0),
-      sessions: metricValue(row, 1),
-      pageViews: metricValue(row, 2),
-    })),
+    activity: Array.from({ length: 30 }, (_, index) => {
+      const minutesAgo = 29 - index;
+      const row = minuteRows.get(minutesAgo);
+      return {
+        minute: minutesAgo === 0 ? 'Hiện tại' : `${minutesAgo} phút trước`,
+        events: metricValue(row, 0),
+        pageViews: metricValue(row, 1),
+      };
+    }),
     pages: (pages.rows || []).map(row => ({
-      path: row.dimensionValues?.[0]?.value || '/',
+      path: row.dimensionValues?.[0]?.value || 'Không rõ tiêu đề',
       views: metricValue(row, 0),
       users: metricValue(row, 1),
     })),
-    range: '30 ngày gần nhất',
+    events: (events.rows || []).map(row => ({
+      name: row.dimensionValues?.[0]?.value || '(not set)',
+      count: metricValue(row, 0),
+    })),
+    range: '30 phút gần nhất',
+    refreshedAt: new Date().toISOString(),
   };
 }
 

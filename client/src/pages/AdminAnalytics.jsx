@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const number = value => Number(value || 0).toLocaleString('vi-VN');
-const shortDate = value => value ? `${value.slice(6, 8)}/${value.slice(4, 6)}` : '';
+const refreshedTime = value => value ? new Date(value).toLocaleTimeString('vi-VN') : '';
 
 export default function AdminAnalytics() {
   const navigate = useNavigate();
@@ -14,8 +14,8 @@ export default function AdminAnalytics() {
   const [loading, setLoading] = useState(true);
   const [configMissing, setConfigMissing] = useState(false);
 
-  const loadReport = useCallback(async () => {
-    setLoading(true);
+  const loadReport = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     try {
       const { data } = await axios.get('/api/admin/analytics', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -24,9 +24,9 @@ export default function AdminAnalytics() {
       setConfigMissing(false);
     } catch (error) {
       if (error.response?.data?.code === 'GA4_NOT_CONFIGURED') setConfigMissing(true);
-      else toast.error(error.response?.data?.message || 'Không thể tải báo cáo GA4.');
+      else if (!silent) toast.error(error.response?.data?.message || 'Không thể tải báo cáo GA4.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
@@ -37,13 +37,14 @@ export default function AdminAnalytics() {
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadReport();
+    const refreshTimer = window.setInterval(() => loadReport({ silent: true }), 60_000);
+    return () => window.clearInterval(refreshTimer);
   }, [loadReport, navigate, role]);
 
   const metrics = [
-    ['Người dùng hoạt động', report?.totals.users, '👥'],
-    ['Phiên truy cập', report?.totals.sessions, '🧭'],
-    ['Lượt xem trang', report?.totals.pageViews, '👁️'],
-    ['Tổng sự kiện tương tác', report?.totals.events, '⚡'],
+    ['Người dùng hoạt động · 30 phút', report?.totals.users, '👥'],
+    ['Lượt xem trang · 30 phút', report?.totals.pageViews, '👁️'],
+    ['Sự kiện · 30 phút', report?.totals.events, '⚡'],
   ];
 
   return (
@@ -52,8 +53,8 @@ export default function AdminAnalytics() {
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-indigo-600">Google Analytics 4</p>
-            <h1 className="mt-1 text-3xl font-black">Báo cáo truy cập</h1>
-            <p className="mt-2 text-sm text-slate-500">{report?.range || '30 ngày gần nhất'} · Dữ liệu từ GA4</p>
+            <h1 className="mt-1 text-3xl font-black">Báo cáo Realtime</h1>
+            <p className="mt-2 text-sm text-slate-500">{report?.range || '30 phút gần nhất'} · Tự cập nhật mỗi phút{report?.refreshedAt ? ` · Cập nhật lúc ${refreshedTime(report.refreshedAt)}` : ''}</p>
           </div>
           <button onClick={loadReport} disabled={loading} className="rounded-xl bg-indigo-600 px-4 py-2.5 font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60">
             {loading ? 'Đang tải…' : 'Làm mới'}
@@ -70,7 +71,7 @@ export default function AdminAnalytics() {
           <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 dark:border-slate-800 dark:bg-slate-900">Đang tải dữ liệu GA4…</div>
         ) : report ? (
           <>
-            <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {metrics.map(([label, value, icon]) => (
                 <section key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                   <div className="mb-3 text-2xl">{icon}</div>
@@ -82,33 +83,47 @@ export default function AdminAnalytics() {
 
             <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:p-6">
-                <h2 className="mb-5 text-xl font-black">Lượt truy cập theo ngày</h2>
+                <h2 className="mb-5 text-xl font-black">Hoạt động theo phút · 30 phút qua</h2>
                 <div className="h-80">
-                  {report.daily.length ? <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={report.daily}>
+                  {report.activity.length ? <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={report.activity}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="date" tickFormatter={shortDate} minTickGap={24} />
+                      <XAxis dataKey="minute" minTickGap={30} />
                       <YAxis allowDecimals={false} />
-                      <Tooltip labelFormatter={value => `${value.slice(6, 8)}/${value.slice(4, 6)}/${value.slice(0, 4)}`} />
-                      <Line type="monotone" dataKey="users" name="Người dùng" stroke="#4f46e5" strokeWidth={3} dot={false} />
-                      <Line type="monotone" dataKey="sessions" name="Phiên" stroke="#10b981" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="pageViews" name="Lượt xem" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="events" name="Sự kiện" stroke="#4f46e5" strokeWidth={3} dot={false} />
+                      <Line type="monotone" dataKey="pageViews" name="Lượt xem trang" stroke="#10b981" strokeWidth={2} dot={false} />
                     </LineChart>
-                  </ResponsiveContainer> : <div className="flex h-full items-center justify-center text-slate-400">Chưa có dữ liệu trong khoảng thời gian này.</div>}
+                  </ResponsiveContainer> : <div className="flex h-full items-center justify-center text-slate-400">Chưa có hoạt động trong 30 phút gần nhất.</div>}
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:p-6">
-                <h2 className="mb-4 text-xl font-black">Trang được xem nhiều</h2>
-                {report.pages.length ? <div className="space-y-3">
-                  {report.pages.map(page => (
-                    <div key={page.path} className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800">
-                      <p className="break-all font-semibold">{page.path}</p>
-                      <p className="mt-1 text-sm text-slate-500">{number(page.views)} lượt xem · {number(page.users)} người dùng</p>
-                    </div>
-                  ))}
-                </div> : <p className="text-sm text-slate-400">Chưa có dữ liệu trang.</p>}
-              </section>
+              <div className="space-y-6">
+                <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:p-6">
+                  <h2 className="mb-4 text-xl font-black">Trang đang được xem</h2>
+                  <p className="mb-4 text-xs text-slate-500">Theo tiêu đề trang · 30 phút qua</p>
+                  {report.pages.length ? <div className="space-y-3">
+                    {report.pages.map(page => (
+                      <div key={page.path} className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800">
+                        <p className="break-all font-semibold">{page.path}</p>
+                        <p className="mt-1 text-sm text-slate-500">{number(page.views)} lượt xem · {number(page.users)} người dùng</p>
+                      </div>
+                    ))}
+                  </div> : <p className="text-sm text-slate-400">Chưa có trang nào được xem gần đây.</p>}
+                </section>
+
+                <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:p-6">
+                  <h2 className="mb-4 text-xl font-black">Sự kiện gần đây</h2>
+                  {report.events.length ? <div className="space-y-3">
+                    {report.events.map(event => (
+                      <div key={event.name} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-800">
+                        <p className="break-all font-semibold">{event.name}</p>
+                        <p className="shrink-0 text-sm text-slate-500">{number(event.count)}</p>
+                      </div>
+                    ))}
+                  </div> : <p className="text-sm text-slate-400">Chưa có sự kiện nào gần đây.</p>}
+                </section>
+              </div>
             </div>
           </>
         ) : null}
