@@ -45,5 +45,53 @@
     "image": "https://dientuungdung.vn/stores/news_dataimages/2026/102026/14/23/screenshot-2026-10-14-23264020261014232710.png?rt=20261014232817",
     "sourceUrl": "https://vec.global/about/news/plase-show-ha-noi-2026",
     "catalogManaged": true
+  },
+  {
+    "title": "Chung kết Đấu Trường Danh Vọng Mùa Đông 2026",
+    "category": "Gaming",
+    "description": "Trận chung kết của Đấu Trường Danh Vọng Mùa Đông 2026, diễn ra trong khuôn khổ Liên Quân 10Fest. Các đội tuyển xuất sắc nhất tranh chức vô địch mùa giải tại Sân vận động Quốc gia Mỹ Đình. Vé chính thức từ 299.000đ được phân phối qua CTicket.",
+    "location": {
+      "address": "Sân vận động Quốc gia Mỹ Đình",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-11-07T09:00:00+07:00",
+    "endDate": "2026-11-07T23:00:00+07:00",
+    "price": 299000,
+    "stock": 100,
+    "image": "https://lienquan.garena.vn/wp-content/uploads/2026/08/KV-mua-giai.png",
+    "sourceUrl": "https://cticket.vn/en/event/lien-quan-10fest-day1",
+    "catalogManaged": true
+  },
+  {
+    "title": "Tinh Hà \"Say Hi\" Concert – Đêm 3",
+    "category": "Âm nhạc, Giải trí",
+    "description": "Đêm diễn tại Hà Nội của concert Tinh Hà \"Say Hi\" – Hẹn giữa Tinh Hà, do Vie Channel sản xuất. Giá vé tham khảo từ 800.000đ; vé chính thức do Ticketbox phân phối.",
+    "location": {
+      "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-11-14T19:00:00+07:00",
+    "endDate": "2026-11-14T23:00:00+07:00",
+    "price": 800000,
+    "stock": 100,
+    "image": "https://static.vec.global/public/tinh_ha_say_hi_concert_dem_3_2026_1e94040311.jpg",
+    "sourceUrl": "https://ticketbox.vn/tinh-ha-say-hi-dem-3-26590",
+    "catalogManaged": true
+  },
+  {
+    "title": "Tinh Hà \"Say Hi\" Concert – Đêm 4",
+    "category": "Âm nhạc, Giải trí",
+    "description": "Đêm diễn tiếp theo tại Hà Nội của concert Tinh Hà \"Say Hi\" – Hẹn giữa Tinh Hà, do Vie Channel sản xuất. Giá vé tham khảo từ 800.000đ; vé chính thức do Ticketbox phân phối.",
+    "location": {
+      "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh",
+      "city": "Hà Nội"
+    },
+    "startDate": "2026-11-15T19:00:00+07:00",
+    "endDate": "2026-11-15T23:00:00+07:00",
+    "price": 800000,
+    "stock": 100,
+    "image": "https://static.vec.global/public/tinh_ha_say_hi_concert_dem_3_2026_1e94040311.jpg",
+    "sourceUrl": "https://ticketbox.vn/tinh-ha-say-hi-dem-4-26656",
+    "catalogManaged": true
   }
 ]
