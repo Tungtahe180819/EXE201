@@ -67,7 +67,7 @@ const detectEventFilters = userQuery => {
 
 const findRelevantEvents = async filters => {
   const now = new Date();
-  const candidates = await Event.find({ startDate: { $gte: now } })
+  const candidates = await Event.find({ isPublished: { $ne: false }, startDate: { $gte: now } })
     .sort({ startDate: 1 })
     .limit(500)
     .lean();
@@ -85,7 +85,7 @@ const findRelevantEvents = async filters => {
 };
 
 const findMatchingPastEvents = async filters => {
-  const candidates = await Event.find({ startDate: { $lt: new Date() } })
+  const candidates = await Event.find({ isPublished: { $ne: false }, startDate: { $lt: new Date() } })
     .sort({ startDate: -1 })
     .limit(500)
     .lean();
@@ -129,7 +129,7 @@ const findItineraryEvents = async ({ destinationArea, startDate, endDate }) => {
   const end = new Date(`${endDate}T23:59:59.999`);
   const area = normalizeText(destinationArea).trim();
   const areaTokens = area.split(/\s+/).filter(Boolean);
-  const candidates = await Event.find({ startDate: { $gte: start, $lte: end } })
+  const candidates = await Event.find({ isPublished: { $ne: false }, startDate: { $gte: start, $lte: end } })
     .sort({ startDate: 1 })
     .limit(500)
     .lean();

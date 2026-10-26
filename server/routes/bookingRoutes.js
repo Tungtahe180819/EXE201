@@ -14,7 +14,7 @@ const router = express.Router();
 router.post('/', verifyToken, async (req, res) => {
   if (!isCustomerRole(req.user.role)) return res.status(403).json({ message: 'Chỉ người dùng mới có thể đặt lịch.' });
   if (!mongoose.isValidObjectId(req.body.eventId)) return res.status(400).json({ message: 'Sự kiện không hợp lệ.' });
-  const event = await Event.findById(req.body.eventId);
+  const event = await Event.findOne({ _id: req.body.eventId, isPublished: { $ne: false } });
   if (!event) return res.status(404).json({ message: 'Sự kiện không tồn tại.' });
   if (new Date(event.startDate) <= new Date()) return res.status(400).json({ message: 'Không thể xác nhận tham gia sự kiện đã bắt đầu.' });
   const existing = await Booking.findOne({ eventId: event._id, userId: req.user.id });

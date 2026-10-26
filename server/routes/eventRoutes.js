@@ -46,7 +46,7 @@ router.post('/chat', verifyToken, require('../middleware/chatbotAccess'), chatbo
 router.get('/search', async (req, res) => {
     try {
         const { keyword, category } = req.query;
-        let query = {};
+        let query = { isPublished: { $ne: false } };
 
         if (keyword) {
             query.$or = [
@@ -68,9 +68,9 @@ router.get('/search', async (req, res) => {
 
 router.get('/featured', async (req, res) => {
     try {
-        let featured = await Event.find({ isFeatured: true }).limit(5);
+        let featured = await Event.find({ isPublished: { $ne: false }, isFeatured: true }).limit(5);
         if (!featured || featured.length === 0) {
-            featured = await Event.find().sort({ createdAt: -1 }).limit(5);
+            featured = await Event.find({ isPublished: { $ne: false } }).sort({ createdAt: -1 }).limit(5);
         }
         res.status(200).json(featured);
     } catch (err) {
@@ -81,7 +81,7 @@ router.get('/featured', async (req, res) => {
 // Lấy danh mục động từ dữ liệu thay vì viết cứng ở giao diện.
 router.get('/categories', async (req, res) => {
     try {
-        const categories = await Event.distinct('category', { category: { $nin: [null, ''] } });
+        const categories = await Event.distinct('category', { isPublished: { $ne: false }, category: { $nin: [null, ''] } });
         return res.status(200).json(categories.sort((a, b) => a.localeCompare(b, 'vi')));
     } catch (err) {
         return res.status(500).json({ message: 'Không thể tải danh sách thể loại: ' + err.message });
@@ -187,7 +187,7 @@ router.get('/mine', verifyToken, async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const events = await Event.find().sort({ createdAt: -1 });
+        const events = await Event.find({ isPublished: { $ne: false } }).sort({ createdAt: -1 });
         res.status(200).json(events);
     } catch (err) {
         res.status(500).json({ message: "Lỗi server: " + err.message });
@@ -212,7 +212,7 @@ router.put('/reschedule/:id', verifyRole(['admin_master', 'admin_support']), asy
 
 router.get('/:id', async (req, res) => {
     try {
-        const event = await Event.findById(req.params.id);
+        const event = await Event.findOne({ _id: req.params.id, isPublished: { $ne: false } });
         if (!event) return res.status(404).json({ message: "Không tìm thấy sự kiện!" });
         res.status(200).json(event);
     } catch (err) {

@@ -24,7 +24,7 @@ function normalizeItems(rawItems) {
 
 async function quoteOrder(rawItems) {
   const items = normalizeItems(rawItems);
-  const events = await Event.find({ _id: { $in: items.map(item => item.eventId) } });
+  const events = await Event.find({ _id: { $in: items.map(item => item.eventId) }, isPublished: { $ne: false } });
   if (events.length !== items.length) throw new Error('Có sự kiện không còn tồn tại.');
   const byId = new Map(events.map(event => [String(event._id), event]));
   let amount = 0;
@@ -49,6 +49,7 @@ async function fulfillOrder({ userId, rawItems, io, paymentMethod = 'local', pay
     for (const item of items) {
       const event = await Event.findOneAndUpdate({
         _id: item.eventId,
+        isPublished: { $ne: false },
         $expr: { $lte: [{ $add: [{ $ifNull: ['$bookedSlots', 0] }, item.quantity] }, { $ifNull: ['$totalSlots', 100] }] }
       }, { $inc: { bookedSlots: item.quantity } }, { returnDocument: 'after' });
       if (!event) throw new Error('Sự kiện không tồn tại hoặc không còn đủ vé.');

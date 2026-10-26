@@ -3,30 +3,36 @@
     "title": "Festival Bảo tồn và Phát triển làng nghề toàn cầu",
     "category": "Văn hóa",
     "description": "Festival Bảo tồn và Phát triển Làng nghề Toàn cầu lần thứ nhất là sự kiện văn hóa - kinh tế lớn do UBND Thành phố Hà Nội phối hợp với Bộ Nông nghiệp và Môi trường tổ chức từ ngày 12 đến 16/11/2026 tại Hoàng thành Thăng Long. Quy tụ khoảng 200 đại biểu quốc tế đến từ 40–50 quốc gia, lễ hội sở hữu không gian trưng bày 10.000 m² cùng chuỗi hoạt động trải nghiệm tại các làng nghề nổi tiếng như Bát Tràng, Vạn Phúc. Sự kiện nhằm tôn vinh các nghệ nhân, bảo tồn di sản truyền thống, thúc đẩy kết nối du lịch, xuất khẩu và định hình giá trị làng nghề phát triển bền vững.",
-    "location": {
-      "address": "Khu di tích lịch sử Hoàng thành Thăng Long",
-      "city": "Hà Nội"
-    },
+    "location": { "address": "Khu di tích lịch sử Hoàng thành Thăng Long", "city": "Hà Nội" },
     "startDate": "2026-11-14T19:00:00+07:00",
     "price": 0,
     "stock": 100,
-    "image": "https://investphutho.vn/wp-content/uploads/2026/10/hinh-anh-lang-nghe-minh-hoa.png",
+    "image": "https://investphutho.vn/festival-bao-ton-va-phat-trien-lang-nghe-toan-cau-lan-thu-nhat-nam-2026-ket-noi-tinh-hoa-lang-nghe-mo-rong-co-hoi-hop-tac-va-phat-trien/",
     "sourceUrl": "https://nguoihanoi.vn/festival-bao-ton-phat-trien-lang-nghe-toan-cau-ket-noi-de-phat-huy-gia-tri-van-hoa-102954.html",
+    "catalogManaged": true
+  },
+  {
+    "title": "Sơn Son Mài Sắc - Dự án truyền thông nâng cao nhận thức của người trẻ về giá trị di sản sơn mài Việt Nam",
+    "category": "Văn hóa",
+    "description": "Sơn Son Mài Sắc là dự án văn hóa ra đời nhằm kết nối thế hệ trẻ với nghệ thuật sơn mài truyền thống Việt Nam. Thay vì chỉ chiêm ngưỡng tác phẩm hoàn thiện, dự án đồng hành cùng người trẻ khám phá từng lớp giá trị chiều sâu: từ chất liệu thô mộc, kỹ thuật ủ mài công phu, tư duy thẩm mỹ đến câu chuyện của người làm nghề. Với cách tiếp cận gần gũi và mới mẻ, dự án giúp di sản tiếp tục hiện diện trong đời sống đương đại. Thời gian cụ thể đang được ban tổ chức cập nhật; ngày hiển thị tạm xếp trong tháng 11/2026.",
+    "location": { "address": "Đang cập nhật", "city": "Đang cập nhật" },
+    "startDate": "2026-11-01T09:00:00+07:00",
+    "price": 0,
+    "stock": 100,
+    "image": "https://scontent.fsgn2-9.fna.fbcdn.net/v/t39.30808-6/831568126_122114281239479540_4627766509613701082_n.jpg?stp=dst-jpg_tt6&cstp=mx3350x1251&ctp=s3350x1251&_nc_cat=102&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeFh2GT566WjYnPYBzktTrYEAdXDt7LtSdcB1cO3su1J1x05jtAzT_UMMBoPcRKYctgqQkjw0swcKdLSXs9Dp4hv&_nc_ohc=EjWfDMpq2vsQ7kNvwEriaP_&_nc_oc=AdoDS1by8k9xzw7JCRg7TIGLBEGfhbO6VHCVZ1IK96vbGyRivUQiWdSm3xnLVD_IR3I&_nc_zt=23&_nc_ht=scontent.fsgn2-9.fna&_nc_gid=MwnUq_amIPHtkIZGqP9SnQ&_nc_ss=782a8&oh=00_AQMJUhZy1IME2fSe0Zzv9AAVX_u16KTu4zVmjoCQRfOcxA&oe=6AE0AD1A",
+    "sourceUrl": "https://www.facebook.com/Sonsonmaisac2026/",
     "catalogManaged": true
   },
   {
     "title": "SEMITRONICS – Triển lãm quốc tế về Điện tử và Điện tử bán dẫn",
     "category": "Công nghệ",
     "description": "Tập trung vào công nghệ vi mạch, vật liệu bán dẫn, linh kiện điện tử và quy trình sản xuất thiết bị công nghệ cao.",
-    "location": {
-      "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh, Hà Nội",
-      "city": "Hà Nội"
-    },
+    "location": { "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh, Hà Nội", "city": "Hà Nội" },
     "startDate": "2026-10-13T09:00:00+07:00",
     "endDate": "2026-10-15T17:30:00+07:00",
     "price": 0,
     "stock": 100,
-    "image": "https://vec.global/images/vec-building-red.png",
+    "image": "https://static.vec.global/public/611829407_122095209825210007_3328572962403883019_n_8b85a56bdb.jpg",
     "sourceUrl": "https://www.semitronicsvietnam.com/",
     "catalogManaged": true
   },
@@ -34,64 +40,52 @@
     "title": "PLASE SHOW 2026 – Triển lãm quốc tế các Thiết bị biểu diễn chuyên nghiệp",
     "category": "Công nghệ",
     "description": "Triển lãm chuyên ngành quy mô quy tụ các thương hiệu, nhà sản xuất thiết bị âm thanh, ánh sáng sân khấu và công nghệ trình chiếu nghệ thuật. Đây là không gian giao lưu kỹ thuật biểu diễn chuyên nghiệp dành cho các nhà tổ chức sự kiện, nghệ sĩ và kỹ sư sân khấu.",
-    "location": {
-      "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh, Hà Nội",
-      "city": "Hà Nội"
-    },
+    "location": { "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh, Hà Nội", "city": "Hà Nội" },
     "startDate": "2026-10-17T09:00:00+07:00",
     "endDate": "2026-10-19T19:00:00+07:00",
     "price": 0,
     "stock": 100,
     "image": "https://dientuungdung.vn/stores/news_dataimages/2026/102026/14/23/screenshot-2026-10-14-23264020261014232710.png?rt=20261014232817",
-    "sourceUrl": "https://vec.global/about/news/plase-show-ha-noi-2026",
+    "sourceUrl": "https://dientuungdung.vn/plase-show-ha-noi-2026-quy-tu-hang-loat-thuong-hieu-am-thanh-quoc-te-18873.html#gallery-4",
     "catalogManaged": true
   },
   {
-    "title": "Chung kết Đấu Trường Danh Vọng Mùa Đông 2026",
+    "title": "Đấu Trường Danh Vọng Mùa Đông 2026 (Liên Quân Mobile)",
     "category": "Gaming",
-    "description": "Trận chung kết của Đấu Trường Danh Vọng Mùa Đông 2026, diễn ra trong khuôn khổ Liên Quân 10Fest. Các đội tuyển xuất sắc nhất tranh chức vô địch mùa giải tại Sân vận động Quốc gia Mỹ Đình. Vé chính thức từ 299.000đ được phân phối qua CTicket.",
-    "location": {
-      "address": "Sân vận động Quốc gia Mỹ Đình",
-      "city": "Hà Nội"
-    },
-    "startDate": "2026-11-07T09:00:00+07:00",
-    "endDate": "2026-11-07T23:00:00+07:00",
+    "description": "Giải đấu cấp cao nhất của bộ môn Liên Quân Mobile tại Việt Nam. Vòng bảng diễn ra từ 29/08 đến 18/10/2026, Playoffs từ 23/10 đến 25/10/2026 và Chung kết Quốc gia ngày 07/11/2026 tại Sân vận động Quốc gia Mỹ Đình. Vé chung kết tham khảo từ 299.000đ.",
+    "location": { "address": "Sân vận động Quốc gia Mỹ Đình", "city": "Hà Nội" },
+    "startDate": "2026-08-29T00:00:00+07:00",
+    "endDate": "2026-11-07T23:59:59+07:00",
     "price": 299000,
     "stock": 100,
     "image": "https://lienquan.garena.vn/wp-content/uploads/2026/08/KV-mua-giai.png",
-    "sourceUrl": "https://cticket.vn/en/event/lien-quan-10fest-day1",
+    "sourceUrl": "https://lienquan.garena.vn/",
     "catalogManaged": true
   },
   {
-    "title": "Tinh Hà \"Say Hi\" Concert – Đêm 3",
+    "title": "Chuỗi sự kiện Quốc gia: The Grand Esports 2026",
+    "category": "Gaming",
+    "description": "Sự kiện diễn ra từ ngày 09/07 đến 12/07/2026 tại Cục Thể dục Thể thao Việt Nam. Nội dung bảng mô tả chương trình âm nhạc với 24 nghệ sĩ trẻ, kết hợp biểu diễn và giao lưu người hâm mộ.",
+    "location": { "address": "Cục Thể dục Thể thao Việt Nam", "city": "Hà Nội" },
+    "startDate": "2026-07-09T00:00:00+07:00",
+    "endDate": "2026-07-12T23:59:59+07:00",
+    "price": 0,
+    "stock": 100,
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaxx8fw1Wh4qYxXtYI_dLF1XylJ2CPWc1pEX2Op5Hi6O20fENtpk0qLuyL&s=10",
+    "sourceUrl": "https://www.facebook.com/vietnamesportsfederation/posts/ch%C3%ADnh-th%E1%BB%A9c-kh%E1%BB%9Fi-%C4%91%E1%BB%99ng-the-grand-esports-2026-%C4%91%C3%A1nh-d%E1%BA%A5u-b%C6%B0%E1%BB%9Bc-ph%C3%A1t-tri%E1%BB%83n-m%E1%BB%9Bi-c%E1%BB%A7a-th/1347352520862347/",
+    "catalogManaged": true
+  },
+  {
+    "title": "Tinh Hà \"Say Hi\" Concert 2026",
     "category": "Âm nhạc, Giải trí",
-    "description": "Đêm diễn tại Hà Nội của concert Tinh Hà \"Say Hi\" – Hẹn giữa Tinh Hà, do Vie Channel sản xuất. Giá vé tham khảo từ 800.000đ; vé chính thức do Ticketbox phân phối.",
-    "location": {
-      "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh",
-      "city": "Hà Nội"
-    },
+    "description": "Concert Tinh Hà \"Say Hi\" diễn ra trong hai đêm 14–15/11/2026 tại Trung tâm Triển lãm Việt Nam (VEC).",
+    "location": { "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh, Hà Nội", "city": "Hà Nội" },
     "startDate": "2026-11-14T19:00:00+07:00",
-    "endDate": "2026-11-14T23:00:00+07:00",
+    "endDate": "2026-11-15T23:59:59+07:00",
     "price": 800000,
     "stock": 100,
-    "image": "https://static.vec.global/public/tinh_ha_say_hi_concert_dem_3_2026_1e94040311.jpg",
-    "sourceUrl": "https://ticketbox.vn/tinh-ha-say-hi-dem-3-26590",
-    "catalogManaged": true
-  },
-  {
-    "title": "Tinh Hà \"Say Hi\" Concert – Đêm 4",
-    "category": "Âm nhạc, Giải trí",
-    "description": "Đêm diễn tiếp theo tại Hà Nội của concert Tinh Hà \"Say Hi\" – Hẹn giữa Tinh Hà, do Vie Channel sản xuất. Giá vé tham khảo từ 800.000đ; vé chính thức do Ticketbox phân phối.",
-    "location": {
-      "address": "Trung tâm Triển lãm Việt Nam (VEC), Đường Cầu Tứ Liên, Đông Anh",
-      "city": "Hà Nội"
-    },
-    "startDate": "2026-11-15T19:00:00+07:00",
-    "endDate": "2026-11-15T23:00:00+07:00",
-    "price": 800000,
-    "stock": 100,
-    "image": "https://static.vec.global/public/tinh_ha_say_hi_concert_dem_3_2026_1e94040311.jpg",
-    "sourceUrl": "https://ticketbox.vn/tinh-ha-say-hi-dem-4-26656",
+    "image": "https://cdn.tienphong.vn/images/9JuQEqOPOC8OTG0LX4h7RirUryCNdTG7FEyw45n6PJDmcj6yhVdw3UzRWtZvGbR3AGrjz9rIJZ8Ykm5i7a9-k-G6IBuBPqQyrSUed_yDqvfh6kvTnGlXM7UTo5hd_rY_/796388817-122128969190633607-9198859746334758851-n.jpg.avif",
+    "sourceUrl": "https://www.facebook.com/ktqdNEU/posts/-line-up-neu-concert-2026-s%E1%BA%B5n-s%C3%A0ng-cho-m%E1%BB%99t-%C4%91%C3%AAm-nh%E1%BA%A1c-b%C3%B9ng-n%E1%BB%95-s%C3%A2n-kh%E1%BA%A5u-neu-concert/1556910293134031/",
     "catalogManaged": true
   }
 ]
