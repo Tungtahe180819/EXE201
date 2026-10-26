@@ -15,7 +15,8 @@ const categoryAliases = [
   { category: 'Thể thao', terms: ['the thao', 'bong da', 'chay bo', 'sport', 'marathon'] },
   { category: 'Nghệ thuật', terms: ['nghe thuat', 'trien lam', 'art', 'thoi trang', 'thiet ke'] },
   { category: 'Giáo dục', terms: ['giao duc', 'hoi sach', 'workshop', 'education', 'hoi thao'] },
-  { category: 'Gaming', terms: ['gaming', 'game', 'esport', 'e-sport'] }
+  { category: 'Gaming', terms: ['gaming', 'game', 'esport', 'e-sport', 'lien quan'] },
+  { category: 'Văn hóa', terms: ['van hoa', 'di san', 'lang nghe', 'son mai', 'truyen thong'] }
 ];
 
 const normalizeText = value => String(value || '')
@@ -65,9 +66,23 @@ const detectEventFilters = userQuery => {
   return { asksForEvents, category: matchedCategory?.category || null, city, budget, wantsFree };
 };
 
+const categoryMatches = (eventCategory, requestedCategory) => {
+  if (!requestedCategory) return true;
+  const actual = normalizeText(eventCategory).trim();
+  const requested = normalizeText(requestedCategory).trim();
+  return actual === requested || actual.includes(requested)
+    || actual.split(/[,/&|]/).some(part => part.trim() === requested);
+};
+
 const findRelevantEvents = async filters => {
   const now = new Date();
-  const candidates = await Event.find({ isPublished: { $ne: false }, startDate: { $gte: now } })
+  const candidates = await Event.find({
+    isPublished: { $ne: false },
+    $or: [
+      { endDate: { $gte: now } },
+      { endDate: { $exists: false }, startDate: { $gte: now } }
+    ]
+  })
     .sort({ startDate: 1 })
     .limit(500)
     .lean();
@@ -76,7 +91,7 @@ const findRelevantEvents = async filters => {
     const totalSlots = Number(event.totalSlots ?? event.stock ?? 100);
     const available = Math.max(0, totalSlots - Number(event.bookedSlots || 0));
     if (!available) return false;
-    if (filters.category && normalizeText(event.category) !== normalizeText(filters.category)) return false;
+    if (!categoryMatches(event.category, filters.category)) return false;
     if (filters.city && !normalizeText(`${event.location?.city || ''} ${event.location?.address || ''}`).includes(normalizeText(filters.city))) return false;
     if (filters.wantsFree && Number(event.price || 0) !== 0) return false;
     if (filters.budget && Number(event.price || 0) >= filters.budget.amount) return false;
@@ -85,13 +100,20 @@ const findRelevantEvents = async filters => {
 };
 
 const findMatchingPastEvents = async filters => {
-  const candidates = await Event.find({ isPublished: { $ne: false }, startDate: { $lt: new Date() } })
-    .sort({ startDate: -1 })
+  const now = new Date();
+  const candidates = await Event.find({
+    isPublished: { $ne: false },
+    $or: [
+      { endDate: { $lt: now } },
+      { endDate: { $exists: false }, startDate: { $lt: now } }
+    ]
+  })
+    .sort({ endDate: -1, startDate: -1 })
     .limit(500)
     .lean();
 
   return candidates.filter(event => {
-    if (filters.category && normalizeText(event.category) !== normalizeText(filters.category)) return false;
+    if (!categoryMatches(event.category, filters.category)) return false;
     if (filters.city && !normalizeText(`${event.location?.city || ''} ${event.location?.address || ''}`).includes(normalizeText(filters.city))) return false;
     if (filters.wantsFree && Number(event.price || 0) !== 0) return false;
     if (filters.budget && Number(event.price || 0) >= filters.budget.amount) return false;
@@ -100,12 +122,16 @@ const findMatchingPastEvents = async filters => {
 };
 
 const formatEventLine = (event, index) => {
-  const date = event.startDate
-    ? new Date(event.startDate).toLocaleString('vi-VN', {
+  const formatDate = value => value
+    ? new Date(value).toLocaleString('vi-VN', {
       timeZone: event.timezone || 'Asia/Ho_Chi_Minh',
       day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
     })
     : 'đang cập nhật';
+  const start = formatDate(event.startDate);
+  const sameMoment = event.endDate && event.startDate
+    && new Date(event.endDate).getTime() === new Date(event.startDate).getTime();
+  const date = event.endDate && !sameMoment ? `${start} – ${formatDate(event.endDate)}` : start;
   return `${index + 1}. ${event.title}\n   Giá vé: ${formatPrice(event.price)}\n   Thời gian: ${date}\n   Địa điểm: ${event.location?.address || event.location?.city || 'đang cập nhật địa điểm'}`;
 };
 
@@ -129,7 +155,11 @@ const findItineraryEvents = async ({ destinationArea, startDate, endDate }) => {
   const end = new Date(`${endDate}T23:59:59.999`);
   const area = normalizeText(destinationArea).trim();
   const areaTokens = area.split(/\s+/).filter(Boolean);
-  const candidates = await Event.find({ isPublished: { $ne: false }, startDate: { $gte: start, $lte: end } })
+  const candidates = await Event.find({
+    isPublished: { $ne: false },
+    startDate: { $lte: end },
+    $or: [ { endDate: { $gte: start } }, { endDate: { $exists: false }, startDate: { $gte: start } } ]
+  })
     .sort({ startDate: 1 })
     .limit(500)
     .lean();
@@ -239,16 +269,7 @@ const chatbotSupport = async (req, res) => {
     try {
       const events = await findRelevantEvents(filters);
       const pastEvents = events.length ? [] : await findMatchingPastEvents(filters);
-      const ai = getAI();
-      if (!events.length && ai) {
-        try {
-          const prompt = `Bạn là trợ lý gợi ý hoạt động và sự kiện bằng tiếng Việt. Người dùng hỏi: ${userQuery}\nDữ liệu Eventverse hiện không có sự kiện sắp tới còn vé khớp chính xác. Hãy nói rõ điều này trước. Sau đó gợi ý tối đa 3 hướng tìm kiếm/loại hoạt động bên ngoài Eventverse phù hợp với địa điểm, sở thích và mức giá nếu có. Không được khẳng định một sự kiện cụ thể đang diễn ra, ngày giờ, giá vé hay còn vé nếu không có nguồn xác minh. Gắn nhãn rõ đây là gợi ý tham khảo chưa được Eventverse xác minh và khuyên kiểm tra trang của ban tổ chức.`;
-          const aiResponse = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
-          return res.status(200).json({ success: true, source: 'general_ai', reply: aiResponse.text || localEventReply(events, pastEvents, filters), remainingUses: req.chatbotTrialRemaining });
-        } catch (error) {
-          console.error('Gemini gợi ý sự kiện thất bại:', error.message);
-        }
-      }
+      // Event queries are answered from verified Eventverse records only.
       return res.status(200).json({
         success: true,
         source: 'eventverse_database',
