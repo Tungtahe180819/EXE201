@@ -261,8 +261,14 @@ const generateSmartItinerary = async (req, res) => {
 
 // 2. Chatbot AI hỗ trợ khách hàng
 const chatbotSupport = async (req, res) => {
-  const userQuery = String(req.body.userQuery || '').trim();
+  const userQuery = String(req.body.userQuery || '').trim().slice(0, 2000);
   if (!userQuery) return res.status(400).json({ success: false, message: 'Vui lòng nhập câu hỏi.' });
+  const history = Array.isArray(req.body.history)
+    ? req.body.history
+      .filter(item => ['user', 'assistant'].includes(item?.role) && typeof item?.text === 'string')
+      .slice(-8)
+      .map(item => ({ role: item.role, text: item.text.trim().slice(0, 1000) }))
+    : [];
 
   const filters = detectEventFilters(userQuery);
   if (filters.asksForEvents) {
@@ -294,7 +300,8 @@ const chatbotSupport = async (req, res) => {
       return res.status(503).json({ success: false, message: 'Trợ lý AI chưa được cấu hình. Bạn vẫn có thể hỏi tôi để tìm sự kiện theo giá, thể loại hoặc địa điểm.' });
     }
 
-    const prompt = `Bạn là trợ lý Eventverse, trả lời tự nhiên, hữu ích và chi tiết bằng tiếng Việt. Bạn có thể tư vấn chung về ý tưởng đi chơi, loại hình sự kiện, cách lên kế hoạch và cách sử dụng website. Không được bịa trạng thái đơn hàng, chính sách hoàn tiền, nội dung website hoặc khẳng định sự kiện cụ thể đang diễn ra/còn vé khi chưa có dữ liệu xác minh. Nếu gợi ý hoạt động không có trong dữ liệu Eventverse, nói rõ đó chỉ là gợi ý tham khảo bên ngoài, chưa được xác minh lịch/giá, và khuyên kiểm tra trang của ban tổ chức. Với yêu cầu hỗ trợ giao dịch, hướng dẫn người dùng vào Trung tâm hỗ trợ hoặc biểu mẫu Góp ý/Khiếu nại.\nCâu hỏi: ${userQuery}`;
+    const conversation = history.map(item => `${item.role === 'user' ? 'Người dùng' : 'Trợ lý'}: ${item.text}`).join('\n');
+    const prompt = `Bạn là trợ lý hỗ trợ khách hàng Eventverse, trả lời bằng tiếng Việt tự nhiên. Trả lời thẳng câu hỏi mới nhất trước, ngắn gọn (thường 2–5 câu hoặc vài gạch đầu dòng khi cần). Dùng lịch sử hội thoại để hiểu đại từ và câu hỏi nối tiếp; không nhắc lại những gì đã rõ. Nếu thiếu thông tin quan trọng, hỏi một câu làm rõ cụ thể. Chỉ khẳng định tính năng/chính sách của Eventverse khi có thông tin trong ngữ cảnh; không bịa trạng thái đơn hàng, giá, lịch, sự kiện hoặc chính sách hoàn tiền. Với yêu cầu giao dịch, hướng dẫn vào Trung tâm hỗ trợ hoặc biểu mẫu Góp ý/Khiếu nại. Gợi ý hoạt động ngoài Eventverse phải được ghi rõ là tham khảo và chưa xác minh lịch/giá.\n${conversation ? `LỊCH SỬ GẦN ĐÂY:\n${conversation}\n` : ''}CÂU HỎI CẦN TRẢ LỜI: ${userQuery}`;
     
     const aiResponse = await ai.models.generateContent({ 
       model: 'gemini-2.5-flash', 

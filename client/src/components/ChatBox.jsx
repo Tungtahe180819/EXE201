@@ -41,13 +41,17 @@ export default function ChatBox({ role }) {
     if (!input.trim() || loading) return;
 
     const userMessage = input;
+    const conversationHistory = messages
+      .filter((message, index) => index > 0 && ['user', 'bot'].includes(message.sender))
+      .slice(-8)
+      .map(message => ({ role: message.sender === 'user' ? 'user' : 'assistant', text: message.text }));
     setMessages(prev => [...prev, { sender: 'user', text: userMessage }]);
     setInput('');
     setLoading(true);
 
     try {
       // Gọi API chatbot hỗ trợ từ Backend
-      const res = await axios.post('/api/ai/chatbot', { userQuery: userMessage }, {
+      const res = await axios.post('/api/ai/chatbot', { userQuery: userMessage, history: conversationHistory }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const botReply = res.data.reply || res.data.message || "Xin lỗi, tôi chưa hiểu rõ câu hỏi của bạn.";
