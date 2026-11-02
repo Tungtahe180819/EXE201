@@ -111,11 +111,21 @@ function metricValue(row, index) {
 
 function reportTotals(report) {
   const row = report.totals?.[0] || report.rows?.[0];
-  return row ? {
-    users: metricValue(row, 0),
-    pageViews: metricValue(row, 1),
-    events: metricValue(row, 2),
-  } : { users: 0, pageViews: 0, events: 0 };
+  if (!row) return { users: 0, newUsers: 0, averageEngagementSeconds: 0, sessions: 0, pageViews: 0, events: 0 };
+  const value = name => {
+    const index = (report.metricHeaders || []).findIndex(header => header.name === name);
+    return index < 0 ? 0 : metricValue(row, index);
+  };
+  const users = value('activeUsers');
+  const engagementSeconds = value('userEngagementDuration');
+  return {
+    users,
+    newUsers: value('newUsers'),
+    averageEngagementSeconds: users ? engagementSeconds / users : 0,
+    sessions: value('sessions'),
+    pageViews: value('screenPageViews'),
+    events: value('eventCount'),
+  };
 }
 
 async function getRealtimeReport(token, window = '30m') {
@@ -192,22 +202,34 @@ async function getRealtimeReport(token, window = '30m') {
 }
 
 async function getStandardAnalyticsReport(token) {
-  const [summary, activity, pages, events] = await Promise.all([
+  const dateRanges = [{ startDate: '27daysAgo', endDate: 'today' }];
+  const [summary, activity, pages, events, sources] = await Promise.all([
     runStandardReport(token, {
-      dateRanges: [{ startDate: '29daysAgo', endDate: 'today' }],
-      metrics: [{ name: 'activeUsers' }, { name: 'screenPageViews' }, { name: 'eventCount' }],
+      dateRanges,
+      metrics: [
+        { name: 'activeUsers' }, { name: 'newUsers' }, { name: 'userEngagementDuration' },
+        { name: 'sessions' }, { name: 'screenPageViews' }, { name: 'eventCount' },
+      ],
     }),
     runStandardReport(token, {
-      dateRanges: [{ startDate: '29daysAgo', endDate: 'today' }], dimensions: [{ name: 'date' }],
-      metrics: [{ name: 'eventCount' }, { name: 'screenPageViews' }], orderBys: [{ dimension: { dimensionName: 'date' } }], limit: 30,
+      dateRanges, dimensions: [{ name: 'date' }],
+      metrics: [{ name: 'eventCount' }, { name: 'screenPageViews' }],
+      orderBys: [{ dimension: { dimensionName: 'date' } }], limit: 28,
     }),
     runStandardReport(token, {
-      dateRanges: [{ startDate: '29daysAgo', endDate: 'today' }], dimensions: [{ name: 'pageTitle' }],
-      metrics: [{ name: 'screenPageViews' }, { name: 'activeUsers' }], orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }], limit: 10,
+      dateRanges, dimensions: [{ name: 'pageTitle' }],
+      metrics: [{ name: 'screenPageViews' }, { name: 'activeUsers' }],
+      orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }], limit: 10,
     }),
     runStandardReport(token, {
-      dateRanges: [{ startDate: '29daysAgo', endDate: 'today' }], dimensions: [{ name: 'eventName' }],
-      metrics: [{ name: 'eventCount' }], orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }], limit: 10,
+      dateRanges, dimensions: [{ name: 'eventName' }],
+      metrics: [{ name: 'eventCount' }],
+      orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }], limit: 10,
+    }),
+    runStandardReport(token, {
+      dateRanges, dimensions: [{ name: 'sessionSourceMedium' }],
+      metrics: [{ name: 'sessions' }, { name: 'keyEvents' }, { name: 'totalRevenue' }, { name: 'activeUsers' }],
+      orderBys: [{ metric: { metricName: 'sessions' }, desc: true }], limit: 10,
     }),
   ]);
   return {
@@ -215,7 +237,12 @@ async function getStandardAnalyticsReport(token) {
     activity: (activity.rows || []).map(row => ({ minute: row.dimensionValues?.[0]?.value, events: metricValue(row, 0), pageViews: metricValue(row, 1) })),
     pages: (pages.rows || []).map(row => ({ path: row.dimensionValues?.[0]?.value || 'Không rõ tiêu đề', views: metricValue(row, 0), users: metricValue(row, 1) })),
     events: (events.rows || []).map(row => ({ name: row.dimensionValues?.[0]?.value || '(not set)', count: metricValue(row, 0) })),
-    range: '30 ngày gần nhất · Báo cáo GA4', refreshedAt: new Date().toISOString(),
+    sources: (sources.rows || []).map(row => ({
+      source: row.dimensionValues?.[0]?.value || '(direct) / (none)',
+      sessions: metricValue(row, 0), keyEvents: metricValue(row, 1),
+      revenue: metricValue(row, 2), users: metricValue(row, 3),
+    })),
+    range: '28 ngày gần nhất · Báo cáo GA4', refreshedAt: new Date().toISOString(),
   };
 }
 
